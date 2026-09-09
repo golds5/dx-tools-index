@@ -110,6 +110,10 @@
   }
   .gbtn:hover{background:var(--fill-2); color:var(--ink); text-decoration:none}
   .gbtn:active{transform:scale(.96)}
+  /* The display above outranks the browser's own [hidden]{display:none}, so a
+     .gbtn carrying the hidden attribute would still paint. Needed by the
+     Access map link, which must stay invisible unless the reveal check passes. */
+  .gbtn[hidden]{display:none}
 
   /* while the toolbar floats over the dark art it inverts; JS toggles .on-art */
   .toolbar .inner, .toolbar .brand, .toolbar .brand em, .toolbar .gbtn{
