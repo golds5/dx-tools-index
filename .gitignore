@@ -1,0 +1,19 @@
+# Vercel CLI link + build cache (contains project/org ids, not for git)
+.vercel
+
+# Never commit secrets — AUTH_SECRET and AUTH_PASSWORD live in Vercel env vars
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules
+
+# macOS
+.DS_Store
+Icon?
+._*
+
+# Google Drive partial-sync artefacts (this folder lives in Drive)
+*.tmp.driveupload
+*.tmp.drivedownload
