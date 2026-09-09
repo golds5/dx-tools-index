@@ -595,10 +595,11 @@
     <button class="gbtn" id="toggleAll" type="button" aria-pressed="false">Expand all</button>
     <button class="gbtn" id="theme" type="button">Dark</button>
     <!-- Revealed by the script below only for the addresses in OWNERS. Hiding it
-         keeps the registry off a screen-shared demo; it is not the protection.
-         The registry has its own sign-in gate and its own password. -->
-    <a class="gbtn" id="registryLink" href="https://dx-account-registry.vercel.app"
-       target="_blank" rel="noopener" hidden>Accounts ↗</a>
+         keeps the access map off a screen-shared demo; it is not the protection.
+         The Notion page is shared with named people and enforces that itself. -->
+    <a class="gbtn" id="registryLink"
+       href="https://app.notion.com/p/3d648905ea77814fb487dc0d2ddf180e"
+       target="_blank" rel="noopener" hidden>Access map ↗</a>
     <a class="gbtn" href="/api/logout">Sign out</a>
   </div>
 </div>
@@ -1383,10 +1384,10 @@
 </script>
 
 <script>
-/* Show the Accounts link only to the people who own the registry, so it is not
+/* Show the Access map link only to the people who maintain it, so it is not
    sitting in the toolbar during a screen-shared walkthrough. This is about
-   keeping the showcase clean, not about access control — the registry gates
-   itself server side with its own password and its own allowlist. */
+   keeping the showcase clean, not about access control — the Notion page is
+   shared with named people and enforces that on Notion's side. */
 (function(){
   var link = document.getElementById('registryLink');
   if(!link) return;
