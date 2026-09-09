@@ -594,6 +594,11 @@
     <span class="grow"></span>
     <button class="gbtn" id="toggleAll" type="button" aria-pressed="false">Expand all</button>
     <button class="gbtn" id="theme" type="button">Dark</button>
+    <!-- Revealed by the script below only for the addresses in OWNERS. Hiding it
+         keeps the registry off a screen-shared demo; it is not the protection.
+         The registry has its own sign-in gate and its own password. -->
+    <a class="gbtn" id="registryLink" href="https://dx-account-registry.vercel.app"
+       target="_blank" rel="noopener" hidden>Accounts ↗</a>
     <a class="gbtn" href="/api/logout">Sign out</a>
   </div>
 </div>
@@ -1374,6 +1379,27 @@
   });
 
   sync();
+})();
+</script>
+
+<script>
+/* Show the Accounts link only to the people who own the registry, so it is not
+   sitting in the toolbar during a screen-shared walkthrough. This is about
+   keeping the showcase clean, not about access control — the registry gates
+   itself server side with its own password and its own allowlist. */
+(function(){
+  var link = document.getElementById('registryLink');
+  if(!link) return;
+
+  var OWNERS = ['gold@s5tech.co'];
+
+  fetch('/api/me', { credentials:'same-origin', cache:'no-store' })
+    .then(function(r){ return r.ok ? r.json() : null })
+    .then(function(d){
+      var email = d && d.email ? String(d.email).toLowerCase() : '';
+      if(OWNERS.indexOf(email) !== -1) link.hidden = false;
+    })
+    .catch(function(){ /* leave it hidden — a failed check must not reveal it */ });
 })();
 </script>
 </body>
