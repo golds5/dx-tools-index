@@ -41,7 +41,7 @@ deployed site.
 cd /tmp && python3 -c "
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 import functools
-h = functools.partial(SimpleHTTPRequestHandler, directory='<path to this folder>')
+h = functools.partial(SimpleHTTPRequestHandler, directory='/Users/hao/Developer/dx-tools-index')
 HTTPServer(('127.0.0.1', 8900), h).serve_forever()
 "
 ```
