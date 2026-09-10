@@ -604,14 +604,19 @@
      ================================================================== */
 
   /* ---------- top bar ---------- */
-  .topbar{position:sticky; top:0; z-index:80}
-  .topbar .in{
-    max-width:1180px; margin:0 auto; padding:13px 22px;
-    display:flex; align-items:center; gap:16px;
+  /* The bar material goes on the full-width element and only its CONTENT is
+     centred and capped. Putting the background on .in left the white bar
+     floating in the middle of the viewport with page showing either side. */
+  .topbar{
+    position:sticky; top:0; z-index:80;
     background:rgba(var(--glass),.74);
     -webkit-backdrop-filter:blur(26px) saturate(180%);
     backdrop-filter:blur(26px) saturate(180%);
     border-bottom:.5px solid var(--hair);
+  }
+  .topbar .in{
+    max-width:1180px; margin:0 auto; padding:13px 22px;
+    display:flex; align-items:center; gap:16px;
   }
   .logo{
     flex:none; display:inline-flex; align-items:center; gap:8px; height:38px; padding:0 15px;
@@ -711,6 +716,10 @@
     text-align:left; font:inherit; color:inherit; border-radius:inherit;
     -webkit-tap-highlight-color:transparent;
   }
+  /* A link cannot nest inside a button, so the game summary's former <div>s
+     are now <span>s. Spans are inline, and an inline box ignores aspect-ratio
+     — which collapsed the banner to zero height and hid the key art entirely. */
+  .gopen .gbanner, .gopen .gtext, .gopen .gicon{display:block}
   /* Play now moves to its own right-aligned line: a 445px column cannot hold
      the icon, the title block and a 140px pill on one row. */
   .col .card.game .gact{display:flex; justify-content:flex-end; padding:0 18px 18px}
@@ -951,9 +960,9 @@
             <p style="margin-top:12px"><b>Lesson:</b> attach evidence to a subjective report and it becomes
               actionable. We applied the same rule to the other tools.</p>
           </div>
-        </div>
         <div class="cfoot">
           <span class="ghost">Team access</span></div>
+        </div>
       </div>
       <div class="trw">
         <button class="trow" type="button" aria-haspopup="dialog" data-detail="d2">
@@ -995,9 +1004,9 @@
             <div class="flag"><span><b>Not measured.</b> No run counter, so there is no figure for icons
               processed. <b>Shared team login</b> is open work, same as DX-GST.</span></div>
           </div>
-        </div>
         <div class="cfoot">
           <span class="ghost">Team access</span></div>
+        </div>
       </div>
       <div class="trw">
         <button class="trow" type="button" aria-haspopup="dialog" data-detail="d3">
@@ -1096,9 +1105,9 @@
               VPN, and it uses a self-signed certificate — <b>the browser will show a security warning</b>
               before the sign-in prompt. Both are expected for a pilot on an internal host.</span></div>
           </div>
-        </div>
         <div class="cfoot">
           <span class="ghost">VPN + sign-in</span></div>
+        </div>
       </div>
       <div class="trw">
         <button class="trow" type="button" aria-haspopup="dialog" data-detail="d5">
@@ -1141,9 +1150,9 @@
             <div class="flag"><span><b>Not yet measured.</b> It went live 2 days ago, so no joiner has
               finished a 4-week path. The pilot is collecting the first feedback now.</span></div>
           </div>
-        </div>
         <div class="cfoot">
           <span class="ghost">S5 email + access code</span></div>
+        </div>
       </div>
         </div>
       </section>
@@ -1248,9 +1257,9 @@
               </ul>
             </div>
           </div>
-        </div>
         <div class="cfoot">
           <span class="ghost">Free play · no cash value</span></div>
+        </div>
       </article>
       <article class="card glass game">
         <button class="gopen" type="button" aria-haspopup="dialog" data-detail="g1">
@@ -1349,9 +1358,9 @@
               </ul>
             </div>
           </div>
-        </div>
         <div class="cfoot">
           <span class="ghost">Free play · no cash prizes</span></div>
+        </div>
       </article>
       </section>
 
