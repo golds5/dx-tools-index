@@ -570,11 +570,12 @@
 
   /* ---------- one orchestrated entrance, nothing else ---------- */
   @keyframes rise{from{opacity:0; transform:translateY(16px)} to{opacity:1; transform:none}}
-  .heroart, .hero h1, .hero .lede, .hero .scopebar, .hero .ctx{animation:rise .75s var(--ease-soft) both}
+  .heroart, .hero h1, .hero .lede{animation:rise .75s var(--ease-soft) both}
   .hero h1{animation-delay:.07s}
   .hero .lede{animation-delay:.13s}
-  .hero .scopebar{animation-delay:.19s}
-  .hero .ctx{animation-delay:.25s}
+  /* The About panel is a toggle, not part of the page entrance, so it gets its
+     own quick reveal — the .75s orchestrated rise feels sluggish on a click. */
+  .ctx{animation:rise .28s var(--ease-soft) both}
 
   @media (max-width:860px){
     .cbody{grid-template-columns:1fr}
@@ -652,6 +653,8 @@
   }
   .nvi:hover{background:var(--fill); color:var(--ink); text-decoration:none}
   .nvi.strong{color:var(--ink)}
+  /* A pressed nav item reads as active while its panel is open */
+  .nvi[aria-expanded="true"]{background:var(--fill-2); color:var(--ink)}
   .nvi[hidden]{display:none}
   @media (max-width:900px){ .tagline{display:none} }
   @media (max-width:560px){ .logo{font-size:11.5px; padding:0 12px} .nvi{padding:0 9px; font-size:12.5px} }
@@ -858,6 +861,8 @@
       <a class="nvi" id="registryLink"
          href="https://app.notion.com/p/3d648905ea77814fb487dc0d2ddf180e"
          target="_blank" rel="noopener" hidden>Access map &#8599;</a>
+      <button class="nvi" id="aboutBtn" type="button"
+              aria-expanded="false" aria-controls="aboutPanel">About</button>
       <a class="nvi strong" href="/api/logout">Sign out</a>
     </nav>
   </div>
@@ -880,7 +885,8 @@
     <p class="lede">From game operations to asset pipelines, we design, build and deploy the tools that keep
       us moving — <b>faster, smarter, together</b>.</p>
 
-    <div class="ctx glass">
+    <!-- Collapsed by default; the About button in the top bar toggles it. -->
+    <div class="ctx glass" id="aboutPanel" hidden>
       <dl>
         <dt>Why this page exists</dt>
         <dd>DX started building its own software with AI in <b>July 2026</b>. Eight projects exist:
@@ -1447,6 +1453,37 @@
   tbtn.addEventListener('click',function(){
     setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark');
   });
+
+  /* ---- About: the context panel is a toggle in the top bar ----
+     aria-expanded drives both the button's active styling and the reading for
+     assistive tech, so the two can never disagree. */
+  (function(){
+    var btn=document.getElementById('aboutBtn');
+    var panel=document.getElementById('aboutPanel');
+    if(!btn || !panel) return;
+
+    function set(open){
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      panel.hidden = !open;
+    }
+    btn.addEventListener('click', function(){
+      var open = btn.getAttribute('aria-expanded') !== 'true';
+      set(open);
+      // Opening from a scrolled position is pointless if the panel is off
+      // screen above; bring it into view, but never yank the page on close.
+      if(open && panel.getBoundingClientRect().top < 0){
+        panel.scrollIntoView({block:'center', behavior:'smooth'});
+      }
+    });
+    // Escape closes it, unless a detail panel or the lightbox owns the key
+    document.addEventListener('keydown', function(e){
+      if(e.key!=='Escape' || btn.getAttribute('aria-expanded')!=='true') return;
+      var ovl=document.getElementById('ovl'), lb=document.getElementById('lbox');
+      if((ovl && !ovl.hidden) || (lb && !lb.hidden)) return;
+      set(false);
+      btn.focus();
+    });
+  })();
 
   /* ---- concept sheets open full size ---- */
   (function(){
