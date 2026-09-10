@@ -666,11 +666,33 @@
      screens, where --gw equals the wrap's own content width. */
   .grid3{
     --gw:min(1240px, calc(100vw - 44px));
+    /* Track sizes live in custom properties so the drag handles can rewrite
+       them without an inline grid-template — which would beat the media
+       queries below and strand the layout at three columns on a phone. */
+    --c1:1.34fr; --c2:1fr; --c3:1fr;
     width:var(--gw); margin-inline:calc((var(--gw) - 100%) / -2);
-    display:grid; gap:16px; align-items:start; margin-top:26px;
+    display:grid; gap:0; align-items:start; margin-top:26px;
     /* minmax(0,…) or long titles and banners override the ratio entirely */
-    grid-template-columns:minmax(0,1.34fr) minmax(0,1fr) minmax(0,1fr);
+    grid-template-columns:
+      minmax(0,var(--c1)) 16px minmax(0,var(--c2)) 16px minmax(0,var(--c3));
   }
+
+  /* ---------- drag-to-resize handles ---------- */
+  .gutter{
+    align-self:stretch; position:relative; cursor:col-resize;
+    touch-action:none; -webkit-tap-highlight-color:transparent;
+  }
+  .gutter::before{
+    content:""; position:absolute; top:16px; bottom:16px; left:50%;
+    width:2px; margin-left:-1px; border-radius:2px; background:var(--sep);
+    opacity:0; transition:opacity .18s var(--ease-soft), background .18s var(--ease-soft);
+  }
+  .gutter:hover::before, .gutter:focus-visible::before{opacity:1}
+  .gutter.dragging::before{opacity:1; background:var(--blue)}
+  .gutter:focus-visible{outline:none}
+  /* Kill text selection and keep the resize cursor for the whole drag, even
+     when the pointer runs ahead of the handle. */
+  body.resizing{cursor:col-resize; -webkit-user-select:none; user-select:none}
   /* Columns follow DOM order at every width: currently using, piloting, then
      game prototypes. No `order` overrides, so what a screen reader hears and
      what the phone layout stacks match what the desktop grid shows.
@@ -713,6 +735,21 @@
     box-shadow:inset 0 .5px 0 var(--hi);
   }
   .ticon svg{width:21px; height:21px}
+
+  /* Stand-in logos. A directory row reads as a product when the mark carries
+     its own colour — one tinted line icon per column made all six look like
+     the same tool. These are placeholders: distinct hue per tool, white glyph,
+     no real brand asset. Swap the background for a real logo when one exists. */
+  .ticon[class*="lg-"]{
+    color:#fff;
+    box-shadow:inset 0 .5px 0 rgba(255,255,255,.34), 0 1px 2px rgba(0,0,0,.14);
+  }
+  .lg-grd{background:linear-gradient(150deg,#5b7cfa,#3d4fd6)}
+  .lg-gst{background:linear-gradient(150deg,#f5a63c,#e07414)}
+  .lg-sip{background:linear-gradient(150deg,#a97bf0,#7c47d4)}
+  .lg-lrl{background:linear-gradient(150deg,#37c08a,#149d6a)}
+  .lg-cgs{background:linear-gradient(150deg,#f2708a,#d63f60)}
+  .lg-onb{background:linear-gradient(150deg,#3fbdd6,#1593b4)}
   .tbd{flex:1; min-width:0; padding-right:26px}
   .tnm{display:block; font:600 14.5px/1.32 var(--display); letter-spacing:-.02em; color:var(--ink)}
   .tnm em{font-style:normal; font-weight:400; color:var(--faint)}
@@ -810,6 +847,9 @@
   .ovl-bdy .concepts{grid-template-columns:1fr 0.75fr}
 
   @media (max-width:1080px){
+    /* Below three columns there is nothing to trade width between, so the
+       handles go and the stylesheet takes the tracks back. */
+    .gutter{display:none}
     .grid3{grid-template-columns:1fr 1fr; gap:14px}
     /* Games drop to a full-width row of their own so the banners keep size.
        No `order` needed — it is already last in the DOM. */
@@ -906,7 +946,7 @@
   </header>
 
   <main>
-    <div class="grid3">
+    <div class="grid3" id="panelGrid">
 
       <section class="col glass sc1 b2" id="scope1" aria-labelledby="h-inuse">
         <div class="colhead">
@@ -916,7 +956,7 @@
         <div class="tlist">
       <div class="trw">
         <button class="trow" type="button" aria-haspopup="dialog" data-detail="d0">
-          <span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="M9.2 15.4l2 2 3.6-3.9"/></svg></span>
+          <span class="ticon lg-grd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="M9.2 15.4l2 2 3.6-3.9"/></svg></span>
           <span class="tbd">
             <span class="tnm">DX-GRD <span class="sub">· Game Release Date Checker</span></span>
             <span class="tds">Paste rows from the weekly sync sheet, get <b>every release date</b> back.</span>
@@ -957,7 +997,7 @@
       </div>
       <div class="trw">
         <button class="trow" type="button" aria-haspopup="dialog" data-detail="d1">
-          <span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 17a8 8 0 1 1 16 0"/><path d="M12 17l4.2-5"/><circle cx="12" cy="17" r="1.3" fill="currentColor" stroke="none"/></svg></span>
+          <span class="ticon lg-gst"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 17a8 8 0 1 1 16 0"/><path d="M12 17l4.2-5"/><circle cx="12" cy="17" r="1.3" fill="currentColor" stroke="none"/></svg></span>
           <span class="tbd">
             <span class="tnm">DX-GST <span class="sub">· Game Speed Test</span></span>
             <span class="tds">Weekly <b>game-speed tests</b> per market, with video and lag tagged per spin.</span>
@@ -1011,7 +1051,7 @@
       </div>
       <div class="trw">
         <button class="trow" type="button" aria-haspopup="dialog" data-detail="d2">
-          <span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><rect x="8.2" y="8.2" width="7.6" height="7.6" rx="2"/></svg></span>
+          <span class="ticon lg-sip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><rect x="8.2" y="8.2" width="7.6" height="7.6" rx="2"/></svg></span>
           <span class="tbd">
             <span class="tnm">Square Icon Pro</span>
             <span class="tds">Finds games shipped <b>without a square icon</b> and fixes them in batches.</span>
@@ -1055,7 +1095,7 @@
       </div>
       <div class="trw">
         <button class="trow" type="button" aria-haspopup="dialog" data-detail="d3">
-          <span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9.6" r="5.9"/><path d="M9.5 9.8l1.8 1.8 3.3-3.5"/><path d="M9 15.2L8 21l4-2 4 2-1-5.8"/></svg></span>
+          <span class="ticon lg-lrl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9.6" r="5.9"/><path d="M9.5 9.8l1.8 1.8 3.3-3.5"/><path d="M9 15.2L8 21l4-2 4 2-1-5.8"/></svg></span>
           <span class="tbd">
             <span class="tnm">Licence Registry Lookup</span>
             <span class="tds">Checks a competitor's domain against the <b>official licensing registers</b>.</span>
@@ -1103,6 +1143,9 @@
         </div>
       </section>
 
+      <div class="gutter" role="separator" tabindex="0" aria-orientation="vertical"
+           aria-label="Resize the Currently using and Piloting panels" aria-valuemin="15" aria-valuemax="85" aria-valuenow="50"></div>
+
       <section class="col glass sc2 b3" id="scope2" aria-labelledby="h-pilot">
         <div class="colhead">
           <h2 id="h-pilot">Piloting</h2><span class="n">2</span>
@@ -1111,7 +1154,7 @@
         <div class="tlist">
       <div class="trw">
         <button class="trow" type="button" aria-haspopup="dialog" data-detail="d4">
-          <span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20a8 8 0 1 0-8-8"/><path d="M12 16a4 4 0 1 0-4-4"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><path d="M12.9 11.1L18.5 5.5"/></svg></span>
+          <span class="ticon lg-cgs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20a8 8 0 1 0-8-8"/><path d="M12 16a4 4 0 1 0-4-4"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><path d="M12.9 11.1L18.5 5.5"/></svg></span>
           <span class="tbd">
             <span class="tnm">Competitor Games Scanner</span>
             <span class="tds">Reads competitors' <b>popular-games lists</b> into one chart per region.</span>
@@ -1156,7 +1199,7 @@
       </div>
       <div class="trw">
         <button class="trow" type="button" aria-haspopup="dialog" data-detail="d5">
-          <span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3.5h4.5A1.5 1.5 0 0 1 20 5v14a1.5 1.5 0 0 1-1.5 1.5H14"/><path d="M4 12h9"/><path d="M9.5 8.2L13.3 12l-3.8 3.8"/></svg></span>
+          <span class="ticon lg-onb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3.5h4.5A1.5 1.5 0 0 1 20 5v14a1.5 1.5 0 0 1-1.5 1.5H14"/><path d="M4 12h9"/><path d="M9.5 8.2L13.3 12l-3.8 3.8"/></svg></span>
           <span class="tbd">
             <span class="tnm">S5 Onboarding</span>
             <span class="tds">A <b>4-week reading path</b> through 330 company docs, filtered to your team.</span>
@@ -1201,6 +1244,9 @@
       </div>
         </div>
       </section>
+
+      <div class="gutter" role="separator" tabindex="0" aria-orientation="vertical"
+           aria-label="Resize the Piloting and Game prototypes panels" aria-valuemin="15" aria-valuemax="85" aria-valuenow="50"></div>
 
       <section class="col glass sc3 b1" id="scope3" aria-labelledby="h-games">
         <div class="colhead">
@@ -1453,6 +1499,101 @@
   tbtn.addEventListener('click',function(){
     setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark');
   });
+
+  /* ---- drag the boundary between panels to retrade their width ----
+     Widths are written back as unitless fr values taken straight from the
+     measured pixel widths. fr distributes proportionally, so a saved
+     485/362/362 keeps its ratio at any window size rather than pinning the
+     layout to the pixels of whatever screen it was dragged on. */
+  (function(){
+    var grid=document.getElementById('panelGrid');
+    if(!grid) return;
+    var cols=[].slice.call(grid.querySelectorAll('.col'));
+    var guts=[].slice.call(grid.querySelectorAll('.gutter'));
+    if(!cols.length || !guts.length) return;
+
+    var KEY='dxtools_cols', MIN=200, STEP=24;
+    var VARS=cols.map(function(_,i){ return '--c'+(i+1) });
+    var DEFAULT=['1.34fr','1fr','1fr'];
+
+    function widths(){ return cols.map(function(c){ return c.getBoundingClientRect().width }) }
+    function apply(v){ v.forEach(function(x,i){ grid.style.setProperty(VARS[i], x+(String(x).indexOf('fr')<0?'fr':'')) }) }
+    function wide(){ return !window.matchMedia || matchMedia('(min-width:1081px)').matches }
+
+    function save(){
+      try{ localStorage.setItem(KEY, JSON.stringify(widths().map(Math.round))) }catch(e){}
+      report();
+    }
+    function report(){
+      var w=widths(), total=w.reduce(function(a,b){ return a+b },0);
+      guts.forEach(function(g,i){
+        var left=w.slice(0,i+1).reduce(function(a,b){ return a+b },0);
+        g.setAttribute('aria-valuenow', String(Math.round(left/total*100)));
+      });
+    }
+
+    try{
+      var saved=JSON.parse(localStorage.getItem(KEY));
+      if(Array.isArray(saved) && saved.length===cols.length &&
+         saved.every(function(n){ return typeof n==='number' && n>=MIN })) apply(saved);
+    }catch(e){}
+    report();
+
+    // Move the boundary at index gi by dx pixels, taking from one neighbour and
+    // giving to the other so the pair's combined width never changes.
+    function nudge(gi, dx){
+      var w=widths(), pair=w[gi]+w[gi+1];
+      var a=Math.min(Math.max(w[gi]+dx, MIN), pair-MIN);
+      apply(w.map(function(x,i){ return i===gi ? a : (i===gi+1 ? pair-a : x) }));
+    }
+
+    guts.forEach(function(g,gi){
+      g.addEventListener('pointerdown', function(e){
+        if(!wide() || e.button) return;
+        e.preventDefault();
+        var x0=e.clientX, start=widths();
+        g.classList.add('dragging');
+        document.body.classList.add('resizing');
+
+        function move(ev){
+          var pair=start[gi]+start[gi+1];
+          var a=Math.min(Math.max(start[gi]+(ev.clientX-x0), MIN), pair-MIN);
+          apply(start.map(function(x,i){ return i===gi ? a : (i===gi+1 ? pair-a : x) }));
+        }
+        function up(){
+          g.classList.remove('dragging');
+          document.body.classList.remove('resizing');
+          window.removeEventListener('pointermove', move);
+          window.removeEventListener('pointerup', up);
+          window.removeEventListener('pointercancel', up);
+          save();
+        }
+        window.addEventListener('pointermove', move);
+        window.addEventListener('pointerup', up);
+        window.addEventListener('pointercancel', up);
+      });
+
+      // Keyboard: the handle is a real separator, so arrows must move it too
+      g.addEventListener('keydown', function(e){
+        if(!wide()) return;
+        if(e.key==='ArrowLeft'){ nudge(gi,-STEP); save(); e.preventDefault(); }
+        else if(e.key==='ArrowRight'){ nudge(gi, STEP); save(); e.preventDefault(); }
+        else if(e.key==='Home' || e.key==='End'){
+          apply(DEFAULT); try{ localStorage.removeItem(KEY) }catch(_){}
+          report(); e.preventDefault();
+        }
+      });
+
+      // Double-click a handle to put every panel back to the default ratio
+      g.addEventListener('dblclick', function(){
+        apply(DEFAULT);
+        try{ localStorage.removeItem(KEY) }catch(e){}
+        report();
+      });
+    });
+
+    addEventListener('resize', report, {passive:true});
+  })();
 
   /* ---- About: the context panel is a toggle in the top bar ----
      aria-expanded drives both the button's active styling and the reading for
