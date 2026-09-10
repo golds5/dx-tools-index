@@ -131,8 +131,8 @@
 
   /* ---------- hero art: full-bleed, runs under the toolbar ---------- */
   .heroart{
-    position:relative; margin-top:calc(-1 * var(--tbh)); background:#0d2038;
-    /* the art must not sit above the sticky toolbar */
+    position:relative; background:#0d2038;
+    /* the art must not sit above the sticky top bar */
     z-index:0;
   }
   .heroart-img, .heroart-vid{
@@ -596,18 +596,194 @@
     :root{--muted:#33333a; --faint:#55555c; --glass-a:.92}
     html[data-theme="dark"]{--muted:#dcdce2; --faint:#b4b4ba; --glass-a:.94}
   }
+  /* ==================================================================
+     Three-column directory layout
+     B1 games (widest) · B2 in use · B3 pilot. Row detail opens in a
+     centred overlay rather than inline, because the reading width inside
+     a ~330px column is far too narrow for the bullet lists behind a row.
+     ================================================================== */
+
+  /* ---------- top bar ---------- */
+  .topbar{position:sticky; top:0; z-index:80}
+  .topbar .in{
+    max-width:1180px; margin:0 auto; padding:13px 22px;
+    display:flex; align-items:center; gap:16px;
+    background:rgba(var(--glass),.74);
+    -webkit-backdrop-filter:blur(26px) saturate(180%);
+    backdrop-filter:blur(26px) saturate(180%);
+    border-bottom:.5px solid var(--hair);
+  }
+  .logo{
+    flex:none; display:inline-flex; align-items:center; gap:8px; height:38px; padding:0 15px;
+    border-radius:999px; background:var(--ink); color:var(--bg); text-decoration:none;
+    font:700 13px/1 var(--display); letter-spacing:.04em; text-transform:uppercase;
+    box-shadow:0 1px 2px rgba(0,0,0,.16), 0 8px 22px -12px rgba(0,0,0,.5);
+  }
+  .logo svg{width:15px; height:15px}
+  .tagline{
+    flex:0 1 auto; min-width:0; font-size:13.5px; color:var(--muted);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .topnav{margin-left:auto; flex:none; display:flex; align-items:center; gap:2px}
+  .nvi{
+    display:inline-flex; align-items:center; height:34px; padding:0 12px; flex:none;
+    border:0; background:transparent; border-radius:10px; cursor:pointer; text-decoration:none;
+    font:500 13.5px var(--text); color:var(--muted); white-space:nowrap;
+    transition:background .2s var(--ease-soft), color .2s var(--ease-soft);
+  }
+  .nvi:hover{background:var(--fill); color:var(--ink); text-decoration:none}
+  .nvi.strong{color:var(--ink)}
+  .nvi[hidden]{display:none}
+  @media (max-width:900px){ .tagline{display:none} }
+  @media (max-width:560px){ .logo{font-size:11.5px; padding:0 12px} .nvi{padding:0 9px; font-size:12.5px} }
+
+  /* ---------- the grid ---------- */
+  /* .wrap is a 850px reading column, which is far too narrow for three columns.
+     The grid breaks out of it to a wide directory width while the hero copy and
+     context panel stay at reading width. Collapses to zero break-out on small
+     screens, where --gw equals the wrap's own content width. */
+  .grid3{
+    --gw:min(1240px, calc(100vw - 44px));
+    width:var(--gw); margin-inline:calc((var(--gw) - 100%) / -2);
+    display:grid; gap:16px; align-items:start; margin-top:26px;
+    /* minmax(0,…) or long titles and banners override the ratio entirely */
+    grid-template-columns:minmax(0,1.34fr) minmax(0,1fr) minmax(0,1fr);
+  }
+  /* DOM order is the argument order — in use, then pilot, then games — so it
+     reads correctly to a screen reader and when the columns stack on a phone.
+     On desktop the games column is placed first, as the widest of the three. */
+  .grid3 .b1{order:1}
+  .grid3 .b2{order:2}
+  .grid3 .b3{order:3}
+  .col{border-radius:var(--r-out); padding:18px 16px 8px}
+  .colhead{
+    display:flex; flex-wrap:wrap; align-items:center; gap:9px;
+    padding:2px 6px 13px; border-bottom:.5px solid var(--hair); margin-bottom:8px;
+  }
+  .colhead h2{margin:0; font:600 17px/1.2 var(--display); letter-spacing:-.028em}
+  .colhead .n{
+    font:600 11.5px/1 var(--text); color:var(--acc); padding:4px 8px; border-radius:999px;
+    background:color-mix(in srgb,var(--acc) 13%,transparent);
+  }
+  .colhead p{margin:2px 0 0; flex:1 1 100%; font-size:12.5px; line-height:1.45; color:var(--faint)}
+
+  /* ---------- a tool row ---------- */
+  .tlist{display:flex; flex-direction:column}
+  .trw{position:relative; border-radius:14px; transition:background .22s var(--ease-soft)}
+  .trw:hover{background:rgba(120,120,128,.07)}
+  .trow{
+    display:flex; gap:12px; align-items:flex-start; width:100%; text-align:left;
+    padding:12px 11px 13px; border:0; background:transparent; border-radius:14px;
+    cursor:pointer; font:inherit; color:inherit; -webkit-tap-highlight-color:transparent;
+  }
+  .ticon{
+    flex:none; width:40px; height:40px; border-radius:11px; display:grid; place-items:center;
+    background:color-mix(in srgb,var(--acc) 13%,transparent); color:var(--acc);
+    box-shadow:inset 0 .5px 0 var(--hi);
+  }
+  .ticon svg{width:21px; height:21px}
+  .tbd{flex:1; min-width:0; padding-right:26px}
+  .tnm{display:block; font:600 14.5px/1.32 var(--display); letter-spacing:-.02em; color:var(--ink)}
+  .tnm em{font-style:normal; font-weight:400; color:var(--faint)}
+  /* Clamped to two lines so rows keep a scannable rhythm. Nothing is lost —
+     the full text is the first thing in the overlay. */
+  .tds{
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    margin-top:4px; font-size:12.8px; line-height:1.5; color:var(--muted);
+  }
+  .tmt{display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:8px}
+  .tmt .tag{font-size:9.5px; padding:3px 7px}
+  .tst{font:500 11px/1.3 var(--text); color:var(--faint)}
+  /* Direct link to the tool, top-right. A sibling of the button, never inside
+     it — a link nested in a button is invalid and unreachable by keyboard. */
+  .tgo{
+    position:absolute; top:12px; right:10px; width:26px; height:26px; border-radius:8px;
+    display:grid; place-items:center; color:var(--faint); background:var(--fill);
+    text-decoration:none; transition:.2s var(--ease-soft);
+  }
+  .tgo:hover{color:#fff; background:var(--acc); text-decoration:none}
+  .tgo svg{width:12px; height:12px}
+
+  /* ---------- game cards inside B1 ---------- */
+  .col .card.game{margin:0 0 14px; border-radius:var(--r-mid)}
+  .gopen{
+    display:block; width:100%; padding:0; border:0; background:transparent; cursor:pointer;
+    text-align:left; font:inherit; color:inherit; border-radius:inherit;
+    -webkit-tap-highlight-color:transparent;
+  }
+  /* Play now moves to its own right-aligned line: a 445px column cannot hold
+     the icon, the title block and a 140px pill on one row. */
+  .col .card.game .gact{display:flex; justify-content:flex-end; padding:0 18px 18px}
+
+  /* ---------- detail overlay ---------- */
+  .ovl{position:fixed; inset:0; z-index:150; display:none; padding:22px}
+  .ovl.on{display:grid; place-items:center}
+  .ovl-bd{position:absolute; inset:0; background:rgba(0,0,0,.46); -webkit-backdrop-filter:blur(9px); backdrop-filter:blur(9px)}
+  .ovl-pane{
+    position:relative; width:min(780px,100%); max-height:87vh; overflow:auto; border-radius:var(--r-out);
+    background:rgba(var(--glass),.94);
+    -webkit-backdrop-filter:blur(32px) saturate(190%); backdrop-filter:blur(32px) saturate(190%);
+    border:.5px solid var(--edge-out);
+    box-shadow:inset 0 .5px 0 var(--hi), var(--shadow-l);
+    overscroll-behavior:contain;
+  }
+  .ovl-hd{
+    position:sticky; top:0; z-index:2; display:flex; gap:13px; align-items:flex-start;
+    padding:19px 20px 15px; border-bottom:.5px solid var(--hair);
+    background:rgba(var(--glass),.94);
+    -webkit-backdrop-filter:blur(24px) saturate(180%); backdrop-filter:blur(24px) saturate(180%);
+    border-radius:var(--r-out) var(--r-out) 0 0;
+  }
+  .ovl-hd .ticon{width:38px; height:38px}
+  .ovl-ttl{flex:1; min-width:0}
+  .ovl-ttl h2{margin:0; font:600 19px/1.25 var(--display); letter-spacing:-.03em}
+  .ovl-ttl h2 em{font-style:normal; font-weight:400; color:var(--faint)}
+  .ovl-tags{display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:7px}
+  .ovl-x{
+    flex:none; width:32px; height:32px; border-radius:999px; border:0; cursor:pointer;
+    display:grid; place-items:center; background:var(--fill); color:var(--muted);
+    transition:.2s var(--ease-soft);
+  }
+  .ovl-x:hover{background:var(--fill-2); color:var(--ink)}
+  .ovl-x svg{width:13px; height:13px}
+  .ovl-bdy{padding:16px 20px 4px}
+  .ovl-ft{padding:4px 20px 20px; display:flex; justify-content:flex-end}
+  /* The overlay is already at full reading width, so the two-column concept
+     grid can stay two-up here. */
+  .ovl-bdy .concepts{grid-template-columns:1fr 0.75fr}
+
+  @media (max-width:1080px){
+    .grid3{grid-template-columns:1fr 1fr; gap:14px}
+    /* B1 spans the full width so the banners keep their size */
+    .grid3 .b1{grid-column:1 / -1; order:3}
+    .grid3 .b2{order:1}
+    .grid3 .b3{order:2}
+    .col .card.game{display:inline-block; width:calc(50% - 8px); vertical-align:top; margin-right:14px}
+    .col .card.game:last-of-type{margin-right:0}
+  }
+  @media (max-width:760px){
+    .grid3{grid-template-columns:1fr}
+    .grid3 .b1, .grid3 .b2, .grid3 .b3{grid-column:auto}
+    .col .card.game{display:block; width:auto; margin-right:0}
+    .ovl{padding:0}
+    .ovl-pane{max-height:100vh; height:100%; width:100%; border-radius:0}
+    .ovl-hd{border-radius:0}
+  }
+
   @media print{
     *{animation:none!important}
-    .toolbar, .chev{display:none!important}
+    .topbar, .chev, .tgo, .ovl{display:none!important}
     body{background:#fff}
     body::before{display:none!important}
-    .heroart{margin-top:0}
     .heroart-img{height:150px}
     .heroart-vid{display:none}
     .badgerow{display:none}
-    .card, .sec, .scope, .ctx, .seg{background:#fff!important; border-color:#bbb; box-shadow:none; backdrop-filter:none}
-    details::details-content{block-size:auto!important; opacity:1!important; overflow:visible!important}
-    .card{break-inside:avoid}
+    .card, .sec, .scope, .ctx, .col{background:#fff!important; border-color:#bbb; box-shadow:none; backdrop-filter:none}
+    /* On paper there is no overlay to open, so every row's detail prints
+       underneath it. This is the only way the full content reaches a printout. */
+    .cdet{display:block!important; padding:6px 11px 14px}
+    .grid3{display:block}
+    .card, .trw{break-inside:avoid}
     h1, h3.name{color:#000}
     h1 .grad{-webkit-text-fill-color:#0057b0; color:#0057b0; background:none}
     a{color:#111}
@@ -616,19 +792,22 @@
 </head>
 <body>
 
-<div class="toolbar">
-  <div class="inner glass">
-    <span class="brand">Digital Experience <em>· What we build</em></span>
-    <span class="grow"></span>
-    <button class="gbtn" id="toggleAll" type="button" aria-pressed="false">Expand all</button>
-    <button class="gbtn" id="theme" type="button">Dark</button>
-    <!-- Revealed by the script below only for the addresses in OWNERS. Hiding it
-         keeps the access map off a screen-shared demo; it is not the protection.
-         The Notion page is shared with named people and enforces that itself. -->
-    <a class="gbtn" id="registryLink"
-       href="https://app.notion.com/p/3d648905ea77814fb487dc0d2ddf180e"
-       target="_blank" rel="noopener" hidden>Access map ↗</a>
-    <a class="gbtn" href="/api/logout">Sign out</a>
+<div class="topbar">
+  <div class="in">
+    <a class="logo" href="#top">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.4 4 5.6 4 9s-1.4 6.6-4 9c-2.6-2.4-4-5.6-4-9s1.4-6.6 4-9z"/></svg>
+      Digital Experience
+    </a>
+    <span class="tagline">Tools, pilots and game prototypes built inside the DX department.</span>
+    <nav class="topnav" aria-label="Page controls">
+      <button class="nvi" id="theme" type="button">Dark</button>
+      <!-- Revealed only for the addresses in OWNERS below. Hiding it keeps the
+           access map off a screen-shared demo; it is not the protection. -->
+      <a class="nvi" id="registryLink"
+         href="https://app.notion.com/p/3d648905ea77814fb487dc0d2ddf180e"
+         target="_blank" rel="noopener" hidden>Access map &#8599;</a>
+      <a class="nvi strong" href="/api/logout">Sign out</a>
+    </nav>
   </div>
 </div>
 
@@ -653,21 +832,12 @@
     <p class="lede">From game operations to asset pipelines, we design, build and deploy the tools that keep
       us moving — <b>faster, smarter, together</b>.</p>
 
-    <nav class="scopebar" aria-label="Jump to a scope">
-      <div class="bar">
-        <a class="seg sc1" href="#scope1"><b>5</b><span>Built and run in DX</span></a>
-        <a class="seg sc2" href="#scope2"><b>1</b><span>Piloting with UX&nbsp;Lab</span></a>
-        <a class="seg sc3" href="#scope3"><b>2</b><span>Game prototypes</span></a>
-      </div>
-      <p class="barcap">Eight projects · seven live, one in internal pilot</p>
-    </nav>
-
     <div class="ctx glass">
       <dl>
         <dt>Why this page exists</dt>
         <dd>DX started building its own software with AI in <b>July 2026</b>. Eight projects exist:
-          <b>5 tools</b> inside DX — 4 in use, 1 in pilot — <b>1 tool</b> piloting with UX Lab, and
-          <b>2 game prototypes</b>. This page shows all eight.</dd>
+          <b>4 tools</b> in day-to-day use, <b>2 tools</b> in pilot, and <b>2 game prototypes</b>.
+          This page shows all eight.</dd>
 
         <dt>What we were trying to fix</dt>
         <dd>Four DX jobs were done by hand and kept repeating: weekly game sync, weekly QA icon checks,
@@ -682,39 +852,30 @@
   </header>
 
   <main>
+    <div class="grid3">
 
-  <!-- ============ SCOPE 1 ============ -->
-  <section class="sc1">
-    <div class="srule" id="scope1"><h2>Scope 1 · Built and run inside DX</h2><hr /></div>
-    <div class="scope glass">
-      <span class="tally">5 tools · 4 in use, 1 in pilot</span>
-      <p>Tools DX built for its own work, by <b>more than one member of the team</b>. DX decides what to
-        build, then builds, runs and maintains it. No request to the development backlog.</p>
-    </div>
-
-    <div class="cards list glass">
-
-    <article class="card row">
-      <details>
-        <summary>
-          <div class="sum">
-            <div class="ctop">
-              <h3 class="name">DX-GRD <span class="sub">· Game Release Date Checker</span></h3>
-              <span class="tag live">Live</span>
-              <span class="status">Weekly use · since Jul 2026</span>
-              <span class="chev"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 2.5 8 6l-4 3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </div>
-            <span class="kicker">Weekly game sync</span>
-            <p class="pitch">Paste rows from the weekly game sync sheet. Every game's release date comes back.
-              Copy the finished column straight back in.</p>
-          </div>
-          <div class="tact">
-            <a class="play" href="https://dx-grd.vercel.app" target="_blank" rel="noopener" data-noexpand><span>Use now</span></a>
-          </div>
-        </summary>
-
-        <div class="cbody">
-          <div class="sec">
+      <section class="col glass sc1 b2" id="scope1" aria-labelledby="h-inuse">
+        <div class="colhead">
+          <h2 id="h-inuse">Currently using</h2><span class="n">4</span>
+          <p>Built in DX and running day to day. Each one replaced a job that was done by hand.</p>
+        </div>
+        <div class="tlist">
+      <div class="trw">
+        <button class="trow" type="button" aria-haspopup="dialog" data-detail="d0">
+          <span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="M9.2 15.4l2 2 3.6-3.9"/></svg></span>
+          <span class="tbd">
+            <span class="tnm">DX-GRD <span class="sub">· Game Release Date Checker</span></span>
+            <span class="tds">Paste rows from the weekly game sync sheet. Every game's release date comes back. Copy the finished column straight back in.</span>
+            <span class="tmt"><span class="tag live">Live</span><span class="tst">Weekly use · since Jul 2026</span></span>
+          </span>
+        </button>
+        <a class="tgo" href="https://dx-grd.vercel.app" target="_blank" rel="noopener"
+           aria-label="Open DX-GRD · Game Release Date Checker in a new tab"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 9L9 3M9 3H4.6M9 3v4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <div class="cdet" id="d0"
+             data-title="DX-GRD <span class=&quot;sub&quot;>· Game Release Date Checker</span>"
+             data-tags="<span class=&quot;tag live&quot;>Live</span>"
+             data-href="https://dx-grd.vercel.app" data-label="Use now"
+             data-icon-key="DX-GRD" hidden><div class="sec">
             <h4>Why we built it</h4>
             <ul>
               <li>The Released Date column was filled by hand — <b>one provider site per game</b>, every week.</li>
@@ -738,33 +899,24 @@
             <p>In weekly use since 13 Jul 2026. <b>A person now checks the flagged rows only</b>, not every game.</p>
             <div class="flag"><span><b>Not measured.</b> The tool does not count runs, so there is no
               time-saved figure.</span></div>
-          </div>
-        </div>
-      </details>
-    </article>
-
-    <article class="card row">
-      <details>
-        <summary>
-          <div class="sum">
-            <div class="ctop">
-              <h3 class="name">DX-GST <span class="sub">· Game Speed Test</span></h3>
-              <span class="tag live">Live</span>
-              <span class="tag gate">Password</span>
-              <span class="status">In active use</span>
-              <span class="chev"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 2.5 8 6l-4 3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </div>
-            <span class="kicker">Running since W2 2026</span>
-            <p class="pitch">CS testers record weekly game-speed sessions per market. Video on every test, lag
-              tagged per spin, heatmap by week and market. <b>It found lag that was fixed in the live games.</b></p>
-          </div>
-          <div class="tact">
-            <a class="play" href="https://dx-gst.vercel.app" target="_blank" rel="noopener" data-noexpand><span>Use now</span></a>
-          </div>
-        </summary>
-
-        <div class="cbody">
-          <div class="sec">
+          </div></div>
+      </div>
+      <div class="trw">
+        <button class="trow" type="button" aria-haspopup="dialog" data-detail="d1">
+          <span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 17a8 8 0 1 1 16 0"/><path d="M12 17l4.2-5"/><circle cx="12" cy="17" r="1.3" fill="currentColor" stroke="none"/></svg></span>
+          <span class="tbd">
+            <span class="tnm">DX-GST <span class="sub">· Game Speed Test</span></span>
+            <span class="tds">CS testers record weekly game-speed sessions per market. Video on every test, lag tagged per spin, heatmap by week and market. <b>It found lag that was fixed in the live games.</b></span>
+            <span class="tmt"><span class="tag live">Live</span><span class="tag gate">Password</span><span class="tst">In active use</span></span>
+          </span>
+        </button>
+        <a class="tgo" href="https://dx-gst.vercel.app" target="_blank" rel="noopener"
+           aria-label="Open DX-GST · Game Speed Test in a new tab"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 9L9 3M9 3H4.6M9 3v4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <div class="cdet" id="d1"
+             data-title="DX-GST <span class=&quot;sub&quot;>· Game Speed Test</span>"
+             data-tags="<span class=&quot;tag live&quot;>Live</span><span class=&quot;tag gate&quot;>Password</span>"
+             data-href="https://dx-gst.vercel.app" data-label="Use now"
+             data-icon-key="DX-GST" hidden><div class="sec">
             <h4>Why we built it</h4>
             <ul>
               <li>Speed complaints arrived as chat messages. <b>No video, no date, no number.</b></li>
@@ -801,33 +953,24 @@
           </div>
         </div>
         <div class="cfoot">
-          <span class="ghost">Team access</span>
-        </div>
-      </details>
-    </article>
-
-    <article class="card row">
-      <details>
-        <summary>
-          <div class="sum">
-            <div class="ctop">
-              <h3 class="name">Square Icon Pro</h3>
-              <span class="tag live">Live</span>
-              <span class="tag gate">Team login</span>
-              <span class="status">Weekly use · since Jul 2026</span>
-              <span class="chev"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 2.5 8 6l-4 3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </div>
-            <span class="kicker">Weekly QA workflow</span>
-            <p class="pitch">Finds the games shipped without a square icon, then processes the icons in
-              batches. The weekly sheet-by-sheet scan is now <b>one menu click</b>.</p>
-          </div>
-          <div class="tact">
-            <a class="play" href="https://square-icon-pro.vercel.app" target="_blank" rel="noopener" data-noexpand><span>Use now</span></a>
-          </div>
-        </summary>
-
-        <div class="cbody">
-          <div class="sec">
+          <span class="ghost">Team access</span></div>
+      </div>
+      <div class="trw">
+        <button class="trow" type="button" aria-haspopup="dialog" data-detail="d2">
+          <span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><rect x="8.2" y="8.2" width="7.6" height="7.6" rx="2"/></svg></span>
+          <span class="tbd">
+            <span class="tnm">Square Icon Pro</span>
+            <span class="tds">Finds the games shipped without a square icon, then processes the icons in batches. The weekly sheet-by-sheet scan is now <b>one menu click</b>.</span>
+            <span class="tmt"><span class="tag live">Live</span><span class="tag gate">Team login</span><span class="tst">Weekly use · since Jul 2026</span></span>
+          </span>
+        </button>
+        <a class="tgo" href="https://square-icon-pro.vercel.app" target="_blank" rel="noopener"
+           aria-label="Open Square Icon Pro in a new tab"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 9L9 3M9 3H4.6M9 3v4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <div class="cdet" id="d2"
+             data-title="Square Icon Pro"
+             data-tags="<span class=&quot;tag live&quot;>Live</span><span class=&quot;tag gate&quot;>Team login</span>"
+             data-href="https://square-icon-pro.vercel.app" data-label="Use now"
+             data-icon-key="Square Icon Pro" hidden><div class="sec">
             <h4>Why we built it</h4>
             <ul>
               <li>Finding games with no icon meant reading <b>every tab</b> of the weekly QA sheet by eye.</li>
@@ -854,32 +997,24 @@
           </div>
         </div>
         <div class="cfoot">
-          <span class="ghost">Team access</span>
-        </div>
-      </details>
-    </article>
-
-    <article class="card row">
-      <details>
-        <summary>
-          <div class="sum">
-            <div class="ctop">
-              <h3 class="name">Licence Registry Lookup</h3>
-              <span class="tag live">Live</span>
-              <span class="status">Monthly use</span>
-              <span class="chev"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 2.5 8 6l-4 3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </div>
-            <span class="kicker">Competitor intel · monthly scouting</span>
-            <p class="pitch">Type a competitor domain and it checks the <b>official licensing registers</b>
-              for each market. A regulator logo on a site proves nothing — only the register does.</p>
-          </div>
-          <div class="tact">
-            <a class="play" href="https://competitor-license-checker.vercel.app/" target="_blank" rel="noopener" data-noexpand><span>Use now</span></a>
-          </div>
-        </summary>
-
-        <div class="cbody">
-          <div class="sec">
+          <span class="ghost">Team access</span></div>
+      </div>
+      <div class="trw">
+        <button class="trow" type="button" aria-haspopup="dialog" data-detail="d3">
+          <span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9.6" r="5.9"/><path d="M9.5 9.8l1.8 1.8 3.3-3.5"/><path d="M9 15.2L8 21l4-2 4 2-1-5.8"/></svg></span>
+          <span class="tbd">
+            <span class="tnm">Licence Registry Lookup</span>
+            <span class="tds">Type a competitor domain and it checks the <b>official licensing registers</b> for each market. A regulator logo on a site proves nothing — only the register does.</span>
+            <span class="tmt"><span class="tag live">Live</span><span class="tst">Monthly use</span></span>
+          </span>
+        </button>
+        <a class="tgo" href="https://competitor-license-checker.vercel.app/" target="_blank" rel="noopener"
+           aria-label="Open Licence Registry Lookup in a new tab"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 9L9 3M9 3H4.6M9 3v4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <div class="cdet" id="d3"
+             data-title="Licence Registry Lookup"
+             data-tags="<span class=&quot;tag live&quot;>Live</span>"
+             data-href="https://competitor-license-checker.vercel.app/" data-label="Use now"
+             data-icon-key="Licence Registry Lookup" hidden><div class="sec">
             <h4>Why we built it</h4>
             <ul>
               <li>Competitor scouting has to answer one question: <b>is this domain actually licensed in this market?</b></li>
@@ -909,33 +1044,33 @@
             <div class="flag"><span><b>Not measured.</b> No run counter. And the register snapshots are dated —
               each source shows its own date on screen, but they need refetching periodically to stay
               accurate.</span></div>
-          </div>
+          </div></div>
+      </div>
         </div>
-      </details>
-    </article>
+      </section>
 
-    <article class="card row">
-      <details>
-        <summary>
-          <div class="sum">
-            <div class="ctop">
-              <h3 class="name">Competitor Games Scanner</h3>
-              <span class="tag pilot">Pilot</span>
-              <span class="tag gate">Internal</span>
-              <span class="status">In DX testing</span>
-              <span class="chev"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 2.5 8 6l-4 3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </div>
-            <span class="kicker">In development · DX testing</span>
-            <p class="pitch">Crawls competitor sites to read their <b>popular-games lists</b>, then compiles
-              what is currently popular in a region into a chart. All regions, global and local competitors.</p>
-          </div>
-          <div class="tact">
-            <a class="play" href="https://161.118.237.142:8443/?site=ba99" target="_blank" rel="noopener" data-noexpand><span>Test now</span></a>
-          </div>
-        </summary>
-
-        <div class="cbody">
-          <div class="sec">
+      <section class="col glass sc2 b3" id="scope2" aria-labelledby="h-pilot">
+        <div class="colhead">
+          <h2 id="h-pilot">Piloting</h2><span class="n">2</span>
+          <p>Working and in real use, still being proven before a wider rollout.</p>
+        </div>
+        <div class="tlist">
+      <div class="trw">
+        <button class="trow" type="button" aria-haspopup="dialog" data-detail="d4">
+          <span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20a8 8 0 1 0-8-8"/><path d="M12 16a4 4 0 1 0-4-4"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><path d="M12.9 11.1L18.5 5.5"/></svg></span>
+          <span class="tbd">
+            <span class="tnm">Competitor Games Scanner</span>
+            <span class="tds">Crawls competitor sites to read their <b>popular-games lists</b>, then compiles what is currently popular in a region into a chart. All regions, global and local competitors.</span>
+            <span class="tmt"><span class="tag pilot">Pilot</span><span class="tag gate">Internal</span><span class="tst">In DX testing</span></span>
+          </span>
+        </button>
+        <a class="tgo" href="https://161.118.237.142:8443/?site=ba99" target="_blank" rel="noopener"
+           aria-label="Open Competitor Games Scanner in a new tab"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 9L9 3M9 3H4.6M9 3v4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <div class="cdet" id="d4"
+             data-title="Competitor Games Scanner"
+             data-tags="<span class=&quot;tag pilot&quot;>Pilot</span><span class=&quot;tag gate&quot;>Internal</span>"
+             data-href="https://161.118.237.142:8443/?site=ba99" data-label="Test now"
+             data-icon-key="Competitor Games Scanner" hidden><div class="sec">
             <h4>What it does</h4>
             <ul>
               <li>Crawls competitor sites and reads the <b>popular-games list</b> each one publishes.</li>
@@ -963,45 +1098,24 @@
           </div>
         </div>
         <div class="cfoot">
-          <span class="ghost">VPN + sign-in</span>
-        </div>
-      </details>
-    </article>
-    </div>
-  </section>
-
-  <!-- ============ SCOPE 2 ============ -->
-  <section class="sc2">
-    <div class="srule" id="scope2"><h2>Scope 2 · Built in DX, testing with another team</h2><hr /></div>
-    <div class="scope glass">
-      <span class="tally">1 tool · DX + UX Lab</span>
-      <p>Built for company-wide use, piloting first. <b>UX Lab is testing it alongside DX.</b> The first
-        feedback comes from a team that did not build it.</p>
-    </div>
-
-    <div class="cards list glass">
-    <article class="card row">
-      <details>
-        <summary>
-          <div class="sum">
-            <div class="ctop">
-              <h3 class="name">S5 Onboarding</h3>
-              <span class="tag live">Live</span>
-              <span class="tag gate">Sign-in</span>
-              <span class="status">In use · since Sep 2026</span>
-              <span class="chev"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 2.5 8 6l-4 3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </div>
-            <span class="kicker">Built company-wide · piloting with DX and UX Lab</span>
-            <p class="pitch">New joiners get a <b>4-week reading path</b> through 330 company documents,
-              filtered to their team. Priority is computed. Progress is tracked per person.</p>
-          </div>
-          <div class="tact">
-            <a class="play" href="https://s5-onboarding.vercel.app" target="_blank" rel="noopener" data-noexpand><span>Use now</span></a>
-          </div>
-        </summary>
-
-        <div class="cbody">
-          <div class="sec">
+          <span class="ghost">VPN + sign-in</span></div>
+      </div>
+      <div class="trw">
+        <button class="trow" type="button" aria-haspopup="dialog" data-detail="d5">
+          <span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3.5h4.5A1.5 1.5 0 0 1 20 5v14a1.5 1.5 0 0 1-1.5 1.5H14"/><path d="M4 12h9"/><path d="M9.5 8.2L13.3 12l-3.8 3.8"/></svg></span>
+          <span class="tbd">
+            <span class="tnm">S5 Onboarding</span>
+            <span class="tds">New joiners get a <b>4-week reading path</b> through 330 company documents, filtered to their team. Priority is computed. Progress is tracked per person.</span>
+            <span class="tmt"><span class="tag live">Live</span><span class="tag gate">Sign-in</span><span class="tst">In use · since Sep 2026</span></span>
+          </span>
+        </button>
+        <a class="tgo" href="https://s5-onboarding.vercel.app" target="_blank" rel="noopener"
+           aria-label="Open S5 Onboarding in a new tab"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 9L9 3M9 3H4.6M9 3v4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <div class="cdet" id="d5"
+             data-title="S5 Onboarding"
+             data-tags="<span class=&quot;tag live&quot;>Live</span><span class=&quot;tag gate&quot;>Sign-in</span>"
+             data-href="https://s5-onboarding.vercel.app" data-label="Use now"
+             data-icon-key="S5 Onboarding" hidden><div class="sec">
             <h4>Why we built it</h4>
             <ul>
               <li>Onboarding was a link to the Notion workspace. Every new joiner chose their own reading order.</li>
@@ -1029,66 +1143,46 @@
           </div>
         </div>
         <div class="cfoot">
-          <span class="ghost">S5 email + access code</span>
-        </div>
-      </details>
-    </article>
-    </div>
-  </section>
-
-  <!-- ============ SCOPE 3 ============ -->
-  <section class="sc3">
-    <div class="srule" id="scope3"><h2>Scope 3 · Original game prototypes, built with AI</h2><hr /></div>
-    <div class="scope glass">
-      <span class="tally">2 prototypes · playable now</span>
-      <p><b>These exist to test the AI process, not to ship a game.</b> We ran the same five steps twice.
-        The prototypes are what came out.</p>
-      <div class="pipe">
-        <div><b>1</b><span>Ask AI for current market trends</span></div>
-        <div><b>2</b><span>Turn the trends into game ideas</span></div>
-        <div><b>3</b><span>Build the concept and art direction</span></div>
-        <div><b>4</b><span>Build a playable prototype</span></div>
-        <div><b>5</b><span>Test with our VA and CS teams, collect feedback</span></div>
+          <span class="ghost">S5 email + access code</span></div>
       </div>
-      <p style="margin-top:16px"><b>Step 5 happens in the same week as step 1.</b> A trend becomes something
-        a colleague can play while the feedback still matters. The team also built AI skills on a real project.</p>
-    </div>
+        </div>
+      </section>
 
-    <div class="cards">
-
-    <article class="card glass game">
-      <details>
-        <summary>
-          <div class="gbanner">
+      <section class="col glass sc3 b1" id="scope3" aria-labelledby="h-games">
+        <div class="colhead">
+          <h2 id="h-games">Game prototypes</h2><span class="n">2</span>
+          <p>Original slot concepts taken from idea to playable build with AI.</p>
+        </div>
+      <article class="card glass game">
+        <button class="gopen" type="button" aria-haspopup="dialog" data-detail="g0">
+<span class="gbanner">
             <img class="gslide" src="jade-fortune-banner.webp" width="2170" height="725" loading="lazy" decoding="async"
                  alt="Jade Fortune key art: a jade dragon flying through clouds above temple peaks." />
             <img class="gslide is-2" src="jade-fortune-banner02.webp" width="2170" height="725" loading="lazy" decoding="async"
                  alt="Jade Fortune title treatment with the jade dragon and glowing orb." />
-            <div class="gchips">
+            <span class="gchips">
               <span class="tag live">Live</span>
               <span class="tag">Free play</span>
-            </div>
-          </div>
-          <div class="ghead">
-            <div class="gicon">
+            </span>
+          </span>
+          <span class="ghead">
+            <span class="gicon">
               <img src="jade-fortune-icon.webp" width="300" height="300" loading="lazy" decoding="async" alt="" />
-            </div>
-            <div class="gtext">
+            </span>
+            <span class="gtext">
               <h3 class="name">Jade Fortune</h3>
-              <div class="gtags">
+              <span class="gtags">
                 <span class="tag">Slot</span>
                 <span class="tag proto">Prototype</span>
                 <span class="chev"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 2.5 8 6l-4 3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-              </div>
-            </div>
-            <div class="gact">
-              <a class="play" href="https://jade-fortune.vercel.app/" target="_blank" rel="noopener" data-noexpand><span>Play now</span></a>
-            </div>
-          </div>
-        </summary>
-
-        <div class="cbody">
-          <div class="sec">
+              </span>
+            </span>
+            
+          </span>
+        </button>
+        <div class="gact"><a class="play" href="https://jade-fortune.vercel.app/" target="_blank" rel="noopener" data-noexpand><span>Play now</span></a></div>
+        <div class="cdet" id="g0" data-title="Jade Fortune"
+             data-tags="<span class=&quot;tag&quot;>Slot</span><span class=&quot;tag proto&quot;>Prototype</span>" data-game="1" data-href="https://jade-fortune.vercel.app/" data-label="Play now" hidden><div class="sec">
             <h4>What it tested</h4>
             <ul>
               <li>Can a market trend become a concept, an art direction and a playable build?</li>
@@ -1156,44 +1250,38 @@
           </div>
         </div>
         <div class="cfoot">
-          <span class="ghost">Free play · no cash value</span>
-        </div>
-      </details>
-    </article>
-
-    <article class="card glass game">
-      <details>
-        <summary>
-          <div class="gbanner">
+          <span class="ghost">Free play · no cash value</span></div>
+      </article>
+      <article class="card glass game">
+        <button class="gopen" type="button" aria-haspopup="dialog" data-detail="g1">
+<span class="gbanner">
             <img class="gslide" src="muay-thai-banner.webp" width="2170" height="725" loading="lazy" decoding="async"
                  alt="Muay Thai Champion key art: a fighter mid-punch in a floodlit arena hung with Thai flags." />
             <img class="gslide is-2" src="muay-thai-banner02.webp" width="2170" height="725" loading="lazy" decoding="async"
                  alt="Muay Thai Champion title treatment with the championship golden belt." />
-            <div class="gchips">
+            <span class="gchips">
               <span class="tag live">Live</span>
               <span class="tag">Free play</span>
-            </div>
-          </div>
-          <div class="ghead">
-            <div class="gicon">
+            </span>
+          </span>
+          <span class="ghead">
+            <span class="gicon">
               <img src="muay-thai-icon.webp" width="300" height="300" loading="lazy" decoding="async" alt="" />
-            </div>
-            <div class="gtext">
+            </span>
+            <span class="gtext">
               <h3 class="name">Muay Thai Champion <span class="sub">· Golden Belt</span></h3>
-              <div class="gtags">
+              <span class="gtags">
                 <span class="tag">Slot</span>
                 <span class="tag proto">Prototype</span>
                 <span class="chev"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 2.5 8 6l-4 3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-              </div>
-            </div>
-            <div class="gact">
-              <a class="play" href="https://muay-thai-golden-belt.vercel.app/" target="_blank" rel="noopener" data-noexpand><span>Play now</span></a>
-            </div>
-          </div>
-        </summary>
-
-        <div class="cbody">
-          <div class="sec">
+              </span>
+            </span>
+            
+          </span>
+        </button>
+        <div class="gact"><a class="play" href="https://muay-thai-golden-belt.vercel.app/" target="_blank" rel="noopener" data-noexpand><span>Play now</span></a></div>
+        <div class="cdet" id="g1" data-title="Muay Thai Champion <span class=&quot;sub&quot;>· Golden Belt</span>"
+             data-tags="<span class=&quot;tag&quot;>Slot</span><span class=&quot;tag proto&quot;>Prototype</span>" data-game="1" data-href="https://muay-thai-golden-belt.vercel.app/" data-label="Play now" hidden><div class="sec">
             <h4>What it tested</h4>
             <ul>
               <li>Does the process <b>repeat</b>? Second run, same five steps, harder mechanics.</li>
@@ -1263,13 +1351,28 @@
           </div>
         </div>
         <div class="cfoot">
-          <span class="ghost">Free play · no cash prizes</span>
-        </div>
-      </details>
-    </article>
+          <span class="ghost">Free play · no cash prizes</span></div>
+      </article>
+      </section>
+
     </div>
-  </section>
   </main>
+
+  <div class="ovl" id="ovl" role="dialog" aria-modal="true" aria-labelledby="ovlTtl" hidden>
+    <div class="ovl-bd" data-close></div>
+    <div class="ovl-pane" role="document">
+      <div class="ovl-hd">
+        <span class="ticon" id="ovlIcon" aria-hidden="true"></span>
+        <div class="ovl-ttl">
+          <h2 id="ovlTtl"></h2>
+          <div class="ovl-tags" id="ovlTags"></div>
+        </div>
+        <button class="ovl-x" type="button" data-close aria-label="Close"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></button>
+      </div>
+      <div class="ovl-bdy" id="ovlBody"></div>
+      <div class="ovl-ft" id="ovlFoot"></div>
+    </div>
+  </div>
 
   <div class="lbox" id="lbox" hidden role="dialog" aria-modal="true" aria-label="Concept sheet, full size">
     <img id="lboxImg" src="" alt="" />
@@ -1278,7 +1381,7 @@
 
   <footer>
     Digital Experience · S5Tech. Eight projects. Seven returned a live page on 8 September 2026; the eighth
-    is an internal pilot behind sign-in and was not inspected. Each project opens from its own button.
+    is an internal pilot behind sign-in and was not inspected. Each project opens from its own row.
     Written to the S5Tech #BeClear, Context and Over-Communicate frameworks.
   </footer>
 </div>
@@ -1311,7 +1414,12 @@
       document.body.style.overflow = 'hidden';   // don't scroll the page behind
     }
     function close(){
-      box.hidden = true; img.src = ''; document.body.style.overflow = '';
+      box.hidden = true; img.src = '';
+      // A concept sheet is usually opened from inside the detail overlay, which
+      // locked scrolling itself. Only give scrolling back if that panel has
+      // already gone, or the page scrolls behind a panel that is still up.
+      var ovl = document.getElementById('ovl');
+      if(!ovl || ovl.hidden) document.body.style.overflow = '';
     }
     [].slice.call(document.querySelectorAll('.cshot')).forEach(function(fig){
       fig.addEventListener('click', function(){
@@ -1373,47 +1481,94 @@
     start();
   }
 
-  /* ---- toolbar inverts while it floats over the hero art ---- */
-  var art=document.querySelector('.heroart'), bar=document.querySelector('.toolbar');
-  if(art && bar){
-    var queued=false;
-    function paintBar(){
-      queued=false;
-      var pillBottom=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--tbh'))||58;
-      bar.classList.toggle('on-art', art.getBoundingClientRect().bottom > pillBottom);
+  /* ---- row detail opens in a centred overlay ----
+     A ~330px column is far too narrow for the bullet lists behind each row, so
+     the detail is moved out to a panel at full reading width and moved back on
+     close. Moving rather than cloning keeps one copy in the DOM, so the concept
+     images keep the click handlers bound to them at load and ids stay unique. */
+  var ovl   = document.getElementById('ovl');
+  var pane  = ovl && ovl.querySelector('.ovl-pane');
+  var oBody = document.getElementById('ovlBody');
+  var oFoot = document.getElementById('ovlFoot');
+  var oTtl  = document.getElementById('ovlTtl');
+  var oTags = document.getElementById('ovlTags');
+  var oIcon = document.getElementById('ovlIcon');
+
+  if(ovl){
+    var current = null;   // the .cdet element on loan to the overlay
+    var home    = null;   // where to put it back
+    var opener  = null;   // what to refocus on close
+
+    function open(trigger){
+      var det = document.getElementById(trigger.getAttribute('data-detail'));
+      if(!det) return;
+
+      oTtl.innerHTML  = det.getAttribute('data-title') || '';
+      oTags.innerHTML = det.getAttribute('data-tags') || '';
+
+      // Reuse the row's own icon so the panel is recognisably the same thing.
+      var ico = trigger.querySelector('.ticon');
+      oIcon.innerHTML = ico ? ico.innerHTML : '';
+      oIcon.hidden = !ico;
+
+      var href = det.getAttribute('data-href');
+      oFoot.innerHTML = href
+        ? '<a class="play" href="' + href + '" target="_blank" rel="noopener"><span>' +
+          (det.getAttribute('data-label') || 'Open') + '</span></a>'
+        : '';
+
+      home = det.parentNode;
+      current = det;
+      det.hidden = false;
+      oBody.appendChild(det);
+
+      opener = trigger;
+      ovl.hidden = false;
+      ovl.classList.add('on');
+      document.body.style.overflow = 'hidden';
+      pane.scrollTop = 0;
+      var x = ovl.querySelector('.ovl-x');
+      if(x) x.focus();
     }
-    function onScroll(){ if(!queued){ queued=true; requestAnimationFrame(paintBar); } }
-    addEventListener('scroll', onScroll, {passive:true});
-    addEventListener('resize', onScroll, {passive:true});
-    paintBar();
-  }
 
-  var panels=[].slice.call(document.querySelectorAll('.card details'));
-  var buttons=[document.getElementById('toggleAll')];
+    function close(){
+      if(!ovl.classList.contains('on')) return;
+      ovl.classList.remove('on');
+      ovl.hidden = true;
+      document.body.style.overflow = '';
+      if(current && home){ current.hidden = true; home.appendChild(current); }
+      current = home = null;
+      oBody.innerHTML = ''; oFoot.innerHTML = '';
+      if(opener){ opener.focus(); opener = null; }
+    }
 
-  function sync(){
-    var everyOpen=panels.length>0 && panels.every(function(d){return d.open});
-    buttons.forEach(function(b){
-      b.textContent=everyOpen?'Collapse all':'Expand all';
-      b.setAttribute('aria-pressed', everyOpen?'true':'false');
+    document.addEventListener('click', function(e){
+      var t = e.target.closest('[data-detail]');
+      if(t){ open(t); return; }
+      if(e.target.closest('[data-close]')) close();
+    });
+
+    // Capture phase on purpose. The lightbox listens in the bubble phase and
+    // hides itself, so a bubble-phase check here would always see it already
+    // closed and shut this panel too — one Escape collapsing both layers.
+    // Running first lets us stand down while the lightbox is still up.
+    document.addEventListener('keydown', function(e){
+      if(e.key !== 'Escape' || !ovl.classList.contains('on')) return;
+      var lb = document.getElementById('lbox');
+      if(lb && !lb.hidden) return;   // the lightbox owns this Escape
+      close();
+    }, true);
+
+    // Keep focus inside the panel while it is open.
+    ovl.addEventListener('keydown', function(e){
+      if(e.key !== 'Tab') return;
+      var f = pane.querySelectorAll('a[href], button:not([disabled])');
+      if(!f.length) return;
+      var first = f[0], last = f[f.length - 1];
+      if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+      else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
     });
   }
-  buttons.forEach(function(b){
-    b.addEventListener('click',function(){
-      var want=b.getAttribute('aria-pressed')!=='true';
-      panels.forEach(function(d){d.open=want});
-      sync();
-    });
-  });
-  panels.forEach(function(d){d.addEventListener('toggle',sync)});
-
-  /* Play links live inside <summary>; without this a click would open the
-     game AND toggle the card. Keyboard Enter on the link is a click too. */
-  [].slice.call(document.querySelectorAll('summary [data-noexpand]')).forEach(function(a){
-    a.addEventListener('click', function(e){ e.stopPropagation(); });
-  });
-
-  sync();
 })();
 </script>
 
