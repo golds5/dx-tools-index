@@ -74,7 +74,7 @@
       radial-gradient(40% 44% at 8% 4%,   color-mix(in srgb,var(--s1) 30%,transparent), transparent 68%),
       radial-gradient(38% 40% at 92% 30%, color-mix(in srgb,var(--s2) 26%,transparent), transparent 68%),
       radial-gradient(44% 46% at 20% 94%, color-mix(in srgb,var(--s3) 26%,transparent), transparent 68%);
-    filter:blur(70px) saturate(140%);
+    filter:blur(70px) saturate(140%); opacity:.42;
   }
 
   a{color:var(--blue); text-decoration:none}
@@ -139,13 +139,13 @@
      around the monogram, so plain `center` keeps it the focal point at every
      width — object-fit trims top and bottom evenly as the viewport widens. */
   .heroart-img{
-    display:block; width:100%; height:clamp(200px,23vw,330px);
+    display:block; width:100%; height:clamp(150px,13vw,180px);
     object-fit:cover; object-position:center;
   }
   /* the badge is right-aligned to the content column, straddling the art's edge */
   .badgerow{position:absolute; left:0; right:0; bottom:0; z-index:2; transform:translateY(35%); pointer-events:none}
   .logobadge{
-    position:relative; margin-left:auto; width:150px; height:150px; border-radius:50%;
+    position:relative; margin-left:auto; width:96px; height:96px; border-radius:50%;
     overflow:hidden; background:#000;
     /* the row above ignores pointer events; the badge itself must accept them */
     pointer-events:auto;
@@ -176,13 +176,13 @@
 
   h1{
     margin:0 0 18px; font-family:var(--display); font-weight:600;
-    font-size:clamp(34px,5.6vw,54px); line-height:1.02; letter-spacing:-.045em;
+    font-size:clamp(26px,3.2vw,34px); line-height:1.08; letter-spacing:-.035em;
   }
   h1 .grad{
     background:linear-gradient(96deg,var(--s1) 12%,var(--s2) 54%,var(--s3) 96%);
     -webkit-background-clip:text; background-clip:text; color:transparent;
   }
-  .lede{margin:0; max-width:56ch; color:var(--muted); font-size:18px; line-height:1.5; letter-spacing:-.016em}
+  .lede{margin:0; max-width:62ch; color:var(--muted); font-size:15.5px; line-height:1.5; letter-spacing:-.016em}
   .lede b{color:var(--ink); font-weight:500}
 
   /* ---------- signature: the scope bar ----------
@@ -219,15 +219,23 @@
   @media (max-width:640px){ .bar{flex-wrap:wrap} .seg{flex:1 1 100%} }
 
   /* ---------- context panel ---------- */
-  .ctx{border-radius:var(--r-out); padding:24px 26px; margin:30px 0 0}
-  .ctx dl{margin:0; display:grid; grid-template-columns:190px 1fr; gap:16px 26px}
+  .ctx{border-radius:var(--r-out); padding:18px 22px; margin:22px 0 0}
+  /* Three items side by side instead of stacked rows: auto-flow column with
+     two rows keeps each dt directly above its own dd. Was 267px tall. */
+  .ctx dl{
+    margin:0; display:grid; grid-auto-flow:column;
+    grid-template-rows:auto auto; grid-template-columns:repeat(3,1fr); gap:5px 26px;
+  }
   .ctx dt{
     font:600 10.5px/1.5 var(--text); letter-spacing:.09em; text-transform:uppercase;
     color:var(--faint); padding-top:3px;
   }
-  .ctx dd{margin:0; font-size:14.5px; line-height:1.6; color:var(--muted)}
+  .ctx dd{margin:0; font-size:13px; line-height:1.55; color:var(--muted)}
   .ctx dd b{color:var(--ink); font-weight:500}
-  @media (max-width:700px){ .ctx dl{grid-template-columns:1fr; gap:6px 0} .ctx dd{margin-bottom:14px} }
+  @media (max-width:900px){
+    .ctx dl{grid-auto-flow:row; grid-template-rows:none; grid-template-columns:1fr; gap:5px 0}
+    .ctx dd{margin-bottom:12px}
+  }
 
   /* ---------- scope blocks ---------- */
   .sc1{--acc:var(--s1)} .sc2{--acc:var(--s2)} .sc3{--acc:var(--s3)}
@@ -656,7 +664,17 @@
      what the phone layout stacks match what the desktop grid shows.
      The first column is the widest, which puts the most space where the most
      items and the longest copy are. */
-  .col{border-radius:var(--r-out); padding:18px 16px 8px}
+  /* Flat like the reference: a hairline and one soft shadow. The .glass stack
+     — 32px backdrop blur plus a five-layer specular rim — is what made our
+     panels read soft where the reference reads crisp. .col wins because it is
+     declared after .glass at the same specificity. */
+  .col{
+    border-radius:var(--r-out); padding:18px 16px 8px;
+    background:rgba(var(--glass),.80);
+    -webkit-backdrop-filter:none; backdrop-filter:none;
+    border:.5px solid var(--sep);
+    box-shadow:0 1px 2px rgba(0,0,0,.035), 0 8px 24px -16px rgba(0,0,0,.16);
+  }
   .colhead{
     display:flex; flex-wrap:wrap; align-items:center; gap:9px;
     padding:2px 6px 13px; border-bottom:.5px solid var(--hair); margin-bottom:8px;
@@ -706,7 +724,20 @@
   .tgo svg{width:12px; height:12px}
 
   /* ---------- game cards inside B1 ---------- */
-  .col .card.game{margin:0 0 14px; border-radius:var(--r-mid)}
+  /* No panel inside a panel. The reference never nests, and the nested white
+     card is most of why the games column shouted over the two tool columns.
+     Game entries now sit on the column exactly as tool rows do. */
+  .col .card.game{
+    margin:0 0 6px; border-radius:var(--r-mid);
+    background:transparent; border:0; box-shadow:none;
+    -webkit-backdrop-filter:none; backdrop-filter:none;
+  }
+  .col .card.game .gbanner{border-radius:var(--r-in)}
+  .col .card.game .ghead{gap:14px; padding:0 11px 12px}
+  .col .card.game .gtext{padding-top:10px}
+  /* Row-scale action, not the largest control on the page */
+  .col .card.game .play{height:40px; min-width:104px; padding:0 20px}
+  .col .card.game .play span{font-size:14px}
   .gopen{
     display:block; width:100%; padding:0; border:0; background:transparent; cursor:pointer;
     text-align:left; font:inherit; color:inherit; border-radius:inherit;
@@ -1182,7 +1213,6 @@
               <span class="gtags">
                 <span class="tag">Slot</span>
                 <span class="tag proto">Prototype</span>
-                <span class="chev"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 2.5 8 6l-4 3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
               </span>
             </span>
             
@@ -1281,7 +1311,6 @@
               <span class="gtags">
                 <span class="tag">Slot</span>
                 <span class="tag proto">Prototype</span>
-                <span class="chev"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 2.5 8 6l-4 3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
               </span>
             </span>
             
