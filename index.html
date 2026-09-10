@@ -38,7 +38,7 @@
     --shadow-l:0 1px 2px rgba(0,0,0,.06), 0 22px 60px -18px rgba(0,0,0,.28);
     --ease:cubic-bezier(.32,.72,0,1);
     --ease-soft:cubic-bezier(.2,.8,.2,1);
-    --r-out:26px; --r-mid:18px; --r-in:13px;
+    --r-out:8px; --r-mid:5px; --r-in:4px;
     --tbh:58px;   /* toolbar padding-top + pill height */
     --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
     --display:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Inter,system-ui,sans-serif;
@@ -219,7 +219,16 @@
   @media (max-width:640px){ .bar{flex-wrap:wrap} .seg{flex:1 1 100%} }
 
   /* ---------- context panel ---------- */
-  .ctx{border-radius:var(--r-out); padding:18px 22px; margin:22px 0 0}
+  /* One thin grey line, no raised-card treatment. This still carries .glass in
+     the markup, so the blur, the specular rim and the five-layer shadow are all
+     overridden here — .ctx is declared after .glass at the same specificity. */
+  .ctx{
+    border-radius:var(--r-out); padding:18px 22px; margin:22px 0 0;
+    background:transparent;
+    -webkit-backdrop-filter:none; backdrop-filter:none;
+    border:1px solid var(--sep);
+    box-shadow:none;
+  }
   /* Three items side by side instead of stacked rows: auto-flow column with
      two rows keeps each dt directly above its own dd. Was 267px tall. */
   .ctx dl{
@@ -637,7 +646,7 @@
   .topnav{margin-left:auto; flex:none; display:flex; align-items:center; gap:2px}
   .nvi{
     display:inline-flex; align-items:center; height:34px; padding:0 12px; flex:none;
-    border:0; background:transparent; border-radius:10px; cursor:pointer; text-decoration:none;
+    border:0; background:transparent; border-radius:3px; cursor:pointer; text-decoration:none;
     font:500 13.5px var(--text); color:var(--muted); white-space:nowrap;
     transition:background .2s var(--ease-soft), color .2s var(--ease-soft);
   }
@@ -672,8 +681,8 @@
     border-radius:var(--r-out); padding:18px 16px 8px;
     background:rgba(var(--glass),.80);
     -webkit-backdrop-filter:none; backdrop-filter:none;
-    border:.5px solid var(--sep);
-    box-shadow:0 1px 2px rgba(0,0,0,.035), 0 8px 24px -16px rgba(0,0,0,.16);
+    border:1px solid var(--sep);
+    box-shadow:none;
   }
   .colhead{
     display:flex; flex-wrap:wrap; align-items:center; gap:9px;
@@ -688,11 +697,11 @@
 
   /* ---------- a tool row ---------- */
   .tlist{display:flex; flex-direction:column}
-  .trw{position:relative; border-radius:14px; transition:background .22s var(--ease-soft)}
+  .trw{position:relative; border-radius:4px; transition:background .22s var(--ease-soft)}
   .trw:hover{background:rgba(120,120,128,.07)}
   .trow{
     display:flex; gap:12px; align-items:flex-start; width:100%; text-align:left;
-    padding:12px 11px 13px; border:0; background:transparent; border-radius:14px;
+    padding:12px 11px 13px; border:0; background:transparent; border-radius:4px;
     cursor:pointer; font:inherit; color:inherit; -webkit-tap-highlight-color:transparent;
   }
   .ticon{
@@ -716,7 +725,7 @@
   /* Direct link to the tool, top-right. A sibling of the button, never inside
      it — a link nested in a button is invalid and unreachable by keyboard. */
   .tgo{
-    position:absolute; top:12px; right:10px; width:26px; height:26px; border-radius:8px;
+    position:absolute; top:12px; right:10px; width:26px; height:26px; border-radius:3px;
     display:grid; place-items:center; color:var(--faint); background:var(--fill);
     text-decoration:none; transition:.2s var(--ease-soft);
   }
@@ -904,7 +913,7 @@
           <span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="M9.2 15.4l2 2 3.6-3.9"/></svg></span>
           <span class="tbd">
             <span class="tnm">DX-GRD <span class="sub">· Game Release Date Checker</span></span>
-            <span class="tds">Paste rows from the weekly game sync sheet. Every game's release date comes back. Copy the finished column straight back in.</span>
+            <span class="tds">Paste rows from the weekly sync sheet, get <b>every release date</b> back.</span>
             <span class="tmt"><span class="tag live">Live</span><span class="tst">Weekly use · since Jul 2026</span></span>
           </span>
         </button>
@@ -945,7 +954,7 @@
           <span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 17a8 8 0 1 1 16 0"/><path d="M12 17l4.2-5"/><circle cx="12" cy="17" r="1.3" fill="currentColor" stroke="none"/></svg></span>
           <span class="tbd">
             <span class="tnm">DX-GST <span class="sub">· Game Speed Test</span></span>
-            <span class="tds">CS testers record weekly game-speed sessions per market. Video on every test, lag tagged per spin, heatmap by week and market. <b>It found lag that was fixed in the live games.</b></span>
+            <span class="tds">Weekly <b>game-speed tests</b> per market, with video and lag tagged per spin.</span>
             <span class="tmt"><span class="tag live">Live</span><span class="tag gate">Password</span><span class="tst">In active use</span></span>
           </span>
         </button>
@@ -999,7 +1008,7 @@
           <span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><rect x="8.2" y="8.2" width="7.6" height="7.6" rx="2"/></svg></span>
           <span class="tbd">
             <span class="tnm">Square Icon Pro</span>
-            <span class="tds">Finds the games shipped without a square icon, then processes the icons in batches. The weekly sheet-by-sheet scan is now <b>one menu click</b>.</span>
+            <span class="tds">Finds games shipped <b>without a square icon</b> and fixes them in batches.</span>
             <span class="tmt"><span class="tag live">Live</span><span class="tag gate">Team login</span><span class="tst">Weekly use · since Jul 2026</span></span>
           </span>
         </button>
@@ -1043,7 +1052,7 @@
           <span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9.6" r="5.9"/><path d="M9.5 9.8l1.8 1.8 3.3-3.5"/><path d="M9 15.2L8 21l4-2 4 2-1-5.8"/></svg></span>
           <span class="tbd">
             <span class="tnm">Licence Registry Lookup</span>
-            <span class="tds">Type a competitor domain and it checks the <b>official licensing registers</b> for each market. A regulator logo on a site proves nothing — only the register does.</span>
+            <span class="tds">Checks a competitor's domain against the <b>official licensing registers</b>.</span>
             <span class="tmt"><span class="tag live">Live</span><span class="tst">Monthly use</span></span>
           </span>
         </button>
@@ -1099,7 +1108,7 @@
           <span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20a8 8 0 1 0-8-8"/><path d="M12 16a4 4 0 1 0-4-4"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><path d="M12.9 11.1L18.5 5.5"/></svg></span>
           <span class="tbd">
             <span class="tnm">Competitor Games Scanner</span>
-            <span class="tds">Crawls competitor sites to read their <b>popular-games lists</b>, then compiles what is currently popular in a region into a chart. All regions, global and local competitors.</span>
+            <span class="tds">Reads competitors' <b>popular-games lists</b> into one chart per region.</span>
             <span class="tmt"><span class="tag pilot">Pilot</span><span class="tag gate">Internal</span><span class="tst">In DX testing</span></span>
           </span>
         </button>
@@ -1144,7 +1153,7 @@
           <span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3.5h4.5A1.5 1.5 0 0 1 20 5v14a1.5 1.5 0 0 1-1.5 1.5H14"/><path d="M4 12h9"/><path d="M9.5 8.2L13.3 12l-3.8 3.8"/></svg></span>
           <span class="tbd">
             <span class="tnm">S5 Onboarding</span>
-            <span class="tds">New joiners get a <b>4-week reading path</b> through 330 company documents, filtered to their team. Priority is computed. Progress is tracked per person.</span>
+            <span class="tds">A <b>4-week reading path</b> through 330 company docs, filtered to your team.</span>
             <span class="tmt"><span class="tag live">Live</span><span class="tag gate">Sign-in</span><span class="tst">In use · since Sep 2026</span></span>
           </span>
         </button>
