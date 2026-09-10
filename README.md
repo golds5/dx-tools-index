@@ -14,7 +14,7 @@ Live: <https://dx-tools-index.vercel.app> (sign-in required)
 | `api/login.js` | Checks the email domain + password, sets a signed session cookie |
 | `api/logout.js` | Clears the cookie |
 | `vercel.json` | `cleanUrls` + `noindex` / anti-framing headers |
-| `*.webp`, `hero.mp4` | Page assets (hero, logos, game banners, icons, concept art) |
+| `*.webp` | Page assets (hero band, logos, game banners, icons, concept art) |
 
 Public paths (no session needed): `/login`, `/api/login`, `/api/logout`, `/robots.txt`, `/favicon.ico`.
 Everything else redirects to `/login` without a valid cookie.

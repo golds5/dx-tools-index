@@ -135,16 +135,13 @@
     /* the art must not sit above the sticky top bar */
     z-index:0;
   }
-  .heroart-img, .heroart-vid{
-    display:block; width:100%; height:clamp(300px,46vw,560px);
-    object-fit:cover; object-position:center 42%;
+  /* A lean band, not a full-height hero. The source is already cropped tight
+     around the monogram, so plain `center` keeps it the focal point at every
+     width — object-fit trims top and bottom evenly as the viewport widens. */
+  .heroart-img{
+    display:block; width:100%; height:clamp(200px,23vw,330px);
+    object-fit:cover; object-position:center;
   }
-  /* the clip sits on top of the still and fades out when it finishes */
-  .heroart-vid{
-    position:absolute; inset:0; z-index:1; pointer-events:none;
-    opacity:0; transition:opacity .45s var(--ease-soft);
-  }
-  .heroart-vid.playing{opacity:1}
   /* the badge is right-aligned to the content column, straddling the art's edge */
   .badgerow{position:absolute; left:0; right:0; bottom:0; z-index:2; transform:translateY(35%); pointer-events:none}
   .logobadge{
@@ -169,7 +166,7 @@
 
   @media (max-width:860px){
     .logobadge{width:110px; height:110px}
-    .heroart-img{height:clamp(260px,52vw,420px)}
+    .heroart-img{height:clamp(190px,26vw,260px)}
   }
   @media (max-width:560px){
     .logobadge{width:84px; height:84px}
@@ -784,8 +781,7 @@
     .topbar, .chev, .tgo, .ovl{display:none!important}
     body{background:#fff}
     body::before{display:none!important}
-    .heroart-img{height:150px}
-    .heroart-vid{display:none}
+    .heroart-img{height:120px}
     .badgerow{display:none}
     .card, .sec, .scope, .ctx, .col{background:#fff!important; border-color:#bbb; box-shadow:none; backdrop-filter:none}
     /* On paper there is no overlay to open, so every row's detail prints
@@ -821,11 +817,7 @@
 </div>
 
 <div class="heroart">
-  <!-- The still is what you see at rest. Pointing at the hero fades the clip in
-       over it and plays it; leaving fades back to the still. -->
-  <video class="heroart-vid" id="heroVid" src="hero.mp4" poster="hero.webp"
-         muted loop playsinline preload="metadata" aria-hidden="true"></video>
-  <img class="heroart-img" src="hero.webp" width="2292" height="840" fetchpriority="high" decoding="async"
+  <img class="heroart-img" src="hero.webp" width="2292" height="610" fetchpriority="high" decoding="async"
        alt="Super Sticky Tech key visual: the gold S5 monogram surrounded by floating app icons." />
   <div class="wrap badgerow">
     <div class="logobadge">
@@ -1438,37 +1430,6 @@
     box.addEventListener('click', close);
     document.addEventListener('keydown', function(e){
       if(e.key === 'Escape' && !box.hidden) close();
-    });
-  })();
-
-  /* ---- hero clip: plays while the pointer is over the hero ----
-     At rest the still is what you see. Pointing at the hero fades the clip in
-     and plays it (looping); leaving pauses it and fades back to the still.
-     Any failure — autoplay refused, decode error — leaves the still up. */
-  (function(){
-    var art = document.querySelector('.heroart');
-    var vid = document.getElementById('heroVid');
-    if(!art || !vid) return;
-
-    var mq = window.matchMedia;
-    // no pointer to hover with, or the user asked for no motion: still only
-    if(!mq || !mq('(hover: hover)').matches || mq('(prefers-reduced-motion: reduce)').matches) return;
-
-    var broken = false;
-    function hide(){ vid.classList.remove('playing'); }
-
-    vid.addEventListener('playing', function(){ if(!broken) vid.classList.add('playing'); });
-    vid.addEventListener('error', function(){ broken = true; hide(); });
-
-    art.addEventListener('mouseenter', function(){
-      if(broken) return;
-      if(vid.ended){ try{ vid.currentTime = 0; }catch(e){} }
-      var p = vid.play();
-      if(p && typeof p.catch === 'function') p.catch(function(){ broken = true; hide(); });
-    });
-    art.addEventListener('mouseleave', function(){
-      hide();
-      try{ vid.pause(); }catch(e){}
     });
   })();
 
