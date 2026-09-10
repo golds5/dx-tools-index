@@ -275,6 +275,22 @@
     box-shadow:inset 0 .5px 0 var(--hi), inset .5px 0 0 var(--edge), inset -.5px 0 0 var(--edge), var(--shadow-l);
   }
 
+  /* The tool scopes read as one continuous list instead of separately floating
+     panels: the glass material sits on .cards, and each row is divided from the
+     next by a hairline. Rows keep their disclosure — unlike a link directory,
+     the depth behind each row is the whole point of this page.
+     Game cards stay discrete .card.glass panels; their banners need the frame. */
+  .cards.list{border-radius:var(--r-out); padding-bottom:0}
+  .card.row{margin:0; border-radius:0; transition:background .3s var(--ease-soft)}
+  .card.row + .card.row{border-top:.5px solid var(--hair)}
+  .card.row:first-child{border-top-left-radius:var(--r-out); border-top-right-radius:var(--r-out)}
+  .card.row:last-child{border-bottom-left-radius:var(--r-out); border-bottom-right-radius:var(--r-out)}
+  /* A tint, not a lift. A raised shadow on a row inside a shared panel reads as
+     a seam splitting the panel rather than as one row responding. */
+  .card.row:hover, .card.row:has(details[open]){
+    background:rgba(120,120,128,.055); box-shadow:none;
+  }
+
   details{border-radius:inherit}
   summary{
     list-style:none; cursor:pointer; display:flex; gap:16px; align-items:flex-start;
@@ -300,6 +316,14 @@
   .tag.pilot{color:var(--amber); background:color-mix(in srgb,var(--amber) 18%,transparent)}
   .pitch{margin:11px 0 0; font-size:16px; line-height:1.52; color:var(--muted); max-width:72ch}
   .pitch b{color:var(--ink); font-weight:500}
+
+  /* Trailing metadata, right-aligned on the title line. Sits on a line that
+     already exists, so it adds no row height. Wraps to its own right-aligned
+     line when the title row runs out of room. */
+  .status{
+    margin-left:auto; font:500 11.5px/1.45 var(--text); color:var(--faint);
+    white-space:nowrap; letter-spacing:-.004em;
+  }
 
 
   .chev{
@@ -668,15 +692,16 @@
         build, then builds, runs and maintains it. No request to the development backlog.</p>
     </div>
 
-    <div class="cards">
+    <div class="cards list glass">
 
-    <article class="card glass">
+    <article class="card row">
       <details>
         <summary>
           <div class="sum">
             <div class="ctop">
               <h3 class="name">DX-GRD <span class="sub">· Game Release Date Checker</span></h3>
               <span class="tag live">Live</span>
+              <span class="status">Weekly use · since Jul 2026</span>
               <span class="chev"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 2.5 8 6l-4 3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </div>
             <span class="kicker">Weekly game sync</span>
@@ -718,7 +743,7 @@
       </details>
     </article>
 
-    <article class="card glass">
+    <article class="card row">
       <details>
         <summary>
           <div class="sum">
@@ -726,6 +751,7 @@
               <h3 class="name">DX-GST <span class="sub">· Game Speed Test</span></h3>
               <span class="tag live">Live</span>
               <span class="tag gate">Password</span>
+              <span class="status">In active use</span>
               <span class="chev"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 2.5 8 6l-4 3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </div>
             <span class="kicker">Running since W2 2026</span>
@@ -780,7 +806,7 @@
       </details>
     </article>
 
-    <article class="card glass">
+    <article class="card row">
       <details>
         <summary>
           <div class="sum">
@@ -788,6 +814,7 @@
               <h3 class="name">Square Icon Pro</h3>
               <span class="tag live">Live</span>
               <span class="tag gate">Team login</span>
+              <span class="status">Weekly use · since Jul 2026</span>
               <span class="chev"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 2.5 8 6l-4 3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </div>
             <span class="kicker">Weekly QA workflow</span>
@@ -832,13 +859,14 @@
       </details>
     </article>
 
-    <article class="card glass">
+    <article class="card row">
       <details>
         <summary>
           <div class="sum">
             <div class="ctop">
               <h3 class="name">Licence Registry Lookup</h3>
               <span class="tag live">Live</span>
+              <span class="status">Monthly use</span>
               <span class="chev"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 2.5 8 6l-4 3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </div>
             <span class="kicker">Competitor intel · monthly scouting</span>
@@ -886,7 +914,7 @@
       </details>
     </article>
 
-    <article class="card glass">
+    <article class="card row">
       <details>
         <summary>
           <div class="sum">
@@ -894,6 +922,7 @@
               <h3 class="name">Competitor Games Scanner</h3>
               <span class="tag pilot">Pilot</span>
               <span class="tag gate">Internal</span>
+              <span class="status">In DX testing</span>
               <span class="chev"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 2.5 8 6l-4 3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </div>
             <span class="kicker">In development · DX testing</span>
@@ -950,8 +979,8 @@
         feedback comes from a team that did not build it.</p>
     </div>
 
-    <div class="cards">
-    <article class="card glass">
+    <div class="cards list glass">
+    <article class="card row">
       <details>
         <summary>
           <div class="sum">
@@ -959,6 +988,7 @@
               <h3 class="name">S5 Onboarding</h3>
               <span class="tag live">Live</span>
               <span class="tag gate">Sign-in</span>
+              <span class="status">In use · since Sep 2026</span>
               <span class="chev"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 2.5 8 6l-4 3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
             </div>
             <span class="kicker">Built company-wide · piloting with DX and UX Lab</span>
