@@ -669,12 +669,27 @@
     /* Track sizes live in custom properties so the drag handles can rewrite
        them without an inline grid-template — which would beat the media
        queries below and strand the layout at three columns on a phone. */
-    --c1:1.34fr; --c2:1fr; --c3:1fr;
+    --c1:1.2fr; --c2:1fr; --c3:1fr; --c4:1fr;
     width:var(--gw); margin-inline:calc((var(--gw) - 100%) / -2);
     display:grid; gap:0; align-items:start; margin-top:26px;
-    /* minmax(0,…) or long titles and banners override the ratio entirely */
+    /* Four tracks, so a bots or skills panel can drop in later without a
+       relayout. minmax(0,…) or long titles and banners override the ratio. */
     grid-template-columns:
-      minmax(0,var(--c1)) 16px minmax(0,var(--c2)) 16px minmax(0,var(--c3));
+      minmax(0,var(--c1)) 16px minmax(0,var(--c2)) 16px
+      minmax(0,var(--c3)) 16px minmax(0,var(--c4));
+  }
+  /* Track map: 1=c1 2=gut 3=c2 4=gut 5=c3 6=gut 7=c4.
+     A panel with data-span="2" takes the last two tracks and the gutter
+     between them. Set it back to "1" when a fourth panel arrives. */
+  .grid3 [data-span="2"]{grid-column:5 / -1}
+
+  @media (min-width:1081px){
+    /* Two game cards side by side while this panel is double width, which also
+       stops the games column running far past the two tool columns. */
+    .b1[data-span="2"]{
+      display:grid; grid-template-columns:1fr 1fr; gap:0 14px; align-content:start;
+    }
+    .b1[data-span="2"] .colhead{grid-column:1 / -1}
   }
 
   /* ---------- drag-to-resize handles ---------- */
@@ -750,13 +765,13 @@
   .lg-lrl{background:linear-gradient(150deg,#37c08a,#149d6a)}
   .lg-cgs{background:linear-gradient(150deg,#f2708a,#d63f60)}
   .lg-onb{background:linear-gradient(150deg,#3fbdd6,#1593b4)}
-  .tbd{flex:1; min-width:0; padding-right:26px}
-  .tnm{display:block; font:600 14.5px/1.32 var(--display); letter-spacing:-.02em; color:var(--ink)}
+  .tbd{flex:1; min-width:0}
+  .tnm{display:block; padding-right:30px; font:600 14.5px/1.32 var(--display); letter-spacing:-.02em; color:var(--ink)}
   .tnm em{font-style:normal; font-weight:400; color:var(--faint)}
   /* Clamped to two lines so rows keep a scannable rhythm. Nothing is lost —
      the full text is the first thing in the overlay. */
   .tds{
-    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
     margin-top:4px; font-size:12.8px; line-height:1.5; color:var(--muted);
   }
   .tmt{display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:8px}
@@ -948,7 +963,7 @@
   <main>
     <div class="grid3" id="panelGrid">
 
-      <section class="col glass sc1 b2" id="scope1" aria-labelledby="h-inuse">
+      <section class="col glass sc1 b2" data-span="1" id="scope1" aria-labelledby="h-inuse">
         <div class="colhead">
           <h2 id="h-inuse">Currently using</h2><span class="n">4</span>
           <p>Built in DX and running day to day. Each one replaced a job that was done by hand.</p>
@@ -1146,7 +1161,7 @@
       <div class="gutter" role="separator" tabindex="0" aria-orientation="vertical"
            aria-label="Resize the Currently using and Piloting panels" aria-valuemin="15" aria-valuemax="85" aria-valuenow="50"></div>
 
-      <section class="col glass sc2 b3" id="scope2" aria-labelledby="h-pilot">
+      <section class="col glass sc2 b3" data-span="1" id="scope2" aria-labelledby="h-pilot">
         <div class="colhead">
           <h2 id="h-pilot">Piloting</h2><span class="n">2</span>
           <p>Working and in real use, still being proven before a wider rollout.</p>
@@ -1248,7 +1263,7 @@
       <div class="gutter" role="separator" tabindex="0" aria-orientation="vertical"
            aria-label="Resize the Piloting and Game prototypes panels" aria-valuemin="15" aria-valuemax="85" aria-valuenow="50"></div>
 
-      <section class="col glass sc3 b1" id="scope3" aria-labelledby="h-games">
+      <section class="col glass sc3 b1" data-span="2" id="scope3" aria-labelledby="h-games">
         <div class="colhead">
           <h2 id="h-games">Game prototypes</h2><span class="n">2</span>
           <p>Original slot concepts taken from idea to playable build with AI.</p>
@@ -1501,10 +1516,15 @@
   });
 
   /* ---- drag the boundary between panels to retrade their width ----
-     Widths are written back as unitless fr values taken straight from the
-     measured pixel widths. fr distributes proportionally, so a saved
-     485/362/362 keeps its ratio at any window size rather than pinning the
-     layout to the pixels of whatever screen it was dragged on. */
+     The grid has four tracks but only three panels today, because the games
+     panel spans two. So the handles work on PANELS, not tracks: a drag moves
+     width from one panel to its neighbour, and each panel spreads that delta
+     across however many tracks it owns. data-span drives the mapping, so
+     dropping in a bots or skills panel needs no change here.
+
+     Widths are written back as unitless fr taken from measured pixels. fr
+     distributes proportionally, so a saved ratio survives any window size
+     instead of pinning the layout to the screen it was dragged on. */
   (function(){
     var grid=document.getElementById('panelGrid');
     if(!grid) return;
@@ -1512,53 +1532,94 @@
     var guts=[].slice.call(grid.querySelectorAll('.gutter'));
     if(!cols.length || !guts.length) return;
 
-    var KEY='dxtools_cols', MIN=200, STEP=24;
-    var VARS=cols.map(function(_,i){ return '--c'+(i+1) });
-    var DEFAULT=['1.34fr','1fr','1fr'];
+    var KEY='dxtools_cols', MIN=200, STEP=24, GUT=16;
+    var DEFAULT=[1.2,1,1,1];
+    var NT=DEFAULT.length;
+    var VARS=[]; for(var i=1;i<=NT;i++) VARS.push('--c'+i);
 
-    function widths(){ return cols.map(function(c){ return c.getBoundingClientRect().width }) }
-    function apply(v){ v.forEach(function(x,i){ grid.style.setProperty(VARS[i], x+(String(x).indexOf('fr')<0?'fr':'')) }) }
+    var spans=cols.map(function(c){ return parseInt(c.getAttribute('data-span')||'1',10) });
+    var starts=[], acc=0;
+    spans.forEach(function(sp){ starts.push(acc); acc+=sp; });
+
     function wide(){ return !window.matchMedia || matchMedia('(min-width:1081px)').matches }
 
+    // Read the resolved track widths straight off the grid. The template
+    // alternates content track, gutter, content track… so take every other.
+    function tracks(){
+      var all=getComputedStyle(grid).gridTemplateColumns.split(/\s+/).map(parseFloat);
+      var out=[]; for(var i=0;i<all.length;i+=2) out.push(all[i]);
+      return out.slice(0,NT);
+    }
+    function panels(t){
+      return cols.map(function(_,i){
+        var w=0; for(var k=0;k<spans[i];k++) w+=t[starts[i]+k];
+        return w + GUT*(spans[i]-1);
+      });
+    }
+    function applyTracks(t){
+      t.forEach(function(x,i){ grid.style.setProperty(VARS[i], x+'fr') });
+    }
+
+    // Hand dx to panel a and take it from panel b, split across each panel's
+    // own tracks in proportion so a two-track panel keeps its internal balance.
+    function retrade(t,a,b,dx){
+      var out=t.slice();
+      function spread(pi,delta){
+        var tot=0, k;
+        for(k=0;k<spans[pi];k++) tot+=t[starts[pi]+k];
+        for(k=0;k<spans[pi];k++){
+          var share = tot>0 ? t[starts[pi]+k]/tot : 1/spans[pi];
+          out[starts[pi]+k] = t[starts[pi]+k] + delta*share;
+        }
+      }
+      spread(a,dx); spread(b,-dx);
+      return out;
+    }
+    // Clamp before applying, so a fast drag cannot briefly crush a panel
+    function clampDx(p,a,b,dx){
+      return Math.min(Math.max(dx, -(p[a]-MIN)), p[b]-MIN);
+    }
+
+    function report(){
+      var p=panels(tracks());
+      var total=p.reduce(function(x,y){ return x+y },0);
+      var run=0;
+      guts.forEach(function(g,i){
+        run+=p[i];
+        g.setAttribute('aria-valuenow', String(Math.round(run/total*100)));
+      });
+    }
     function save(){
-      try{ localStorage.setItem(KEY, JSON.stringify(widths().map(Math.round))) }catch(e){}
+      try{ localStorage.setItem(KEY, JSON.stringify(tracks().map(function(n){ return Math.round(n) }))) }catch(e){}
       report();
     }
-    function report(){
-      var w=widths(), total=w.reduce(function(a,b){ return a+b },0);
-      guts.forEach(function(g,i){
-        var left=w.slice(0,i+1).reduce(function(a,b){ return a+b },0);
-        g.setAttribute('aria-valuenow', String(Math.round(left/total*100)));
-      });
+    function reset(){
+      applyTracks(DEFAULT);
+      try{ localStorage.removeItem(KEY) }catch(e){}
+      report();
     }
 
     try{
       var saved=JSON.parse(localStorage.getItem(KEY));
-      if(Array.isArray(saved) && saved.length===cols.length &&
-         saved.every(function(n){ return typeof n==='number' && n>=MIN })) apply(saved);
+      // Length must match: a saved 3-track layout from before the fourth
+      // track existed would silently mangle the grid.
+      if(Array.isArray(saved) && saved.length===NT &&
+         saved.every(function(n){ return typeof n==='number' && isFinite(n) && n>0 })){
+        applyTracks(saved);
+      }
     }catch(e){}
     report();
-
-    // Move the boundary at index gi by dx pixels, taking from one neighbour and
-    // giving to the other so the pair's combined width never changes.
-    function nudge(gi, dx){
-      var w=widths(), pair=w[gi]+w[gi+1];
-      var a=Math.min(Math.max(w[gi]+dx, MIN), pair-MIN);
-      apply(w.map(function(x,i){ return i===gi ? a : (i===gi+1 ? pair-a : x) }));
-    }
 
     guts.forEach(function(g,gi){
       g.addEventListener('pointerdown', function(e){
         if(!wide() || e.button) return;
         e.preventDefault();
-        var x0=e.clientX, start=widths();
+        var t0=tracks(), p0=panels(t0), x0=e.clientX;
         g.classList.add('dragging');
         document.body.classList.add('resizing');
 
         function move(ev){
-          var pair=start[gi]+start[gi+1];
-          var a=Math.min(Math.max(start[gi]+(ev.clientX-x0), MIN), pair-MIN);
-          apply(start.map(function(x,i){ return i===gi ? a : (i===gi+1 ? pair-a : x) }));
+          applyTracks(retrade(t0, gi, gi+1, clampDx(p0, gi, gi+1, ev.clientX-x0)));
         }
         function up(){
           g.classList.remove('dragging');
@@ -1573,23 +1634,20 @@
         window.addEventListener('pointercancel', up);
       });
 
-      // Keyboard: the handle is a real separator, so arrows must move it too
+      // It is a real separator, so arrows have to move it too
       g.addEventListener('keydown', function(e){
         if(!wide()) return;
-        if(e.key==='ArrowLeft'){ nudge(gi,-STEP); save(); e.preventDefault(); }
-        else if(e.key==='ArrowRight'){ nudge(gi, STEP); save(); e.preventDefault(); }
-        else if(e.key==='Home' || e.key==='End'){
-          apply(DEFAULT); try{ localStorage.removeItem(KEY) }catch(_){}
-          report(); e.preventDefault();
+        var dir = e.key==='ArrowLeft' ? -1 : e.key==='ArrowRight' ? 1 : 0;
+        if(dir){
+          var t=tracks();
+          applyTracks(retrade(t, gi, gi+1, clampDx(panels(t), gi, gi+1, dir*STEP)));
+          save(); e.preventDefault();
+        } else if(e.key==='Home' || e.key==='End'){
+          reset(); e.preventDefault();
         }
       });
 
-      // Double-click a handle to put every panel back to the default ratio
-      g.addEventListener('dblclick', function(){
-        apply(DEFAULT);
-        try{ localStorage.removeItem(KEY) }catch(e){}
-        report();
-      });
+      g.addEventListener('dblclick', reset);
     });
 
     addEventListener('resize', report, {passive:true});
