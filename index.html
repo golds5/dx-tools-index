@@ -386,7 +386,9 @@
      card leads with the art; the tools stay text-first. */
   .card.game{overflow:hidden}
   .card.game summary{display:block; padding:0; gap:0}
-  .gbanner{position:relative; background:#12203a; line-height:0; overflow:hidden; aspect-ratio:2170/725}
+  /* Matches the cropped source exactly, so object-fit has nothing left to
+     trim. 4:1 is the limit — at 4.5:1 the Muay Thai belt starts to cut. */
+  .gbanner{position:relative; background:#12203a; line-height:0; overflow:hidden; aspect-ratio:2170/542}
   /* two slides, 4s each: hold + 5% zoom, then cross-fade to the other */
   .gbanner .gslide{
     position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
@@ -462,7 +464,9 @@
   @media (max-width:760px){
     .ghead{flex-wrap:wrap; gap:14px; padding:0 18px 18px}
     /* explicit order: icon, then title block, then the action row */
-    .gicon{order:1; width:88px; height:88px; margin-top:-40px; border-radius:20px}
+    /* The 4:1 banner is only ~78px tall on a phone, so an 88px icon would
+       stand taller than the art it straddles. */
+    .gicon{order:1; width:64px; height:64px; margin-top:-26px; border-radius:15px}
     .gtext{order:2; flex:1 1 100%; padding-top:0}
     .gact{order:3; flex:1 1 100%; padding-top:2px}
     .gtext h3.name{font-size:21px}
@@ -817,6 +821,34 @@
   .col[data-span="1"] .card.game .gact{padding:0 11px 14px}
   .col:not([data-span="1"]) .card.game{margin-bottom:18px}
   .col:not([data-span="1"]) .card.game .gact{padding:0 22px 20px}
+
+  /* Play now belongs on the title row, not on a line of its own underneath.
+     It is a link and the card body is a button, and a link cannot nest inside
+     one — so instead of restructuring, the pill is lifted out of the flow and
+     pinned to the card's bottom-right. With the pill no longer taking a row of
+     its own the card ends at the title block, which puts the pill level with
+     it. gtext reserves the pill's width so a long name cannot run under it. */
+  @media (min-width:761px){
+    .col:not([data-span="1"]) .card.game{position:relative}
+    .col:not([data-span="1"]) .card.game .ghead{padding-bottom:18px}
+    /* The pill is 140px at right:22px, so the text must stop 162px short of
+       the gtext box. Between a 120px icon and that reservation the title had
+       only 216px and wrapped to three lines, so the icon comes down and the
+       title sizes to fit two lines at most. */
+    .col:not([data-span="1"]) .card.game .gicon{
+      width:96px; height:96px; margin-top:-42px; border-radius:22px;
+    }
+    .col:not([data-span="1"]) .card.game .ghead{gap:18px}
+    .col:not([data-span="1"]) .card.game .gtext{padding-top:8px; padding-right:162px}
+    .col:not([data-span="1"]) .card.game .gtext h3.name{
+      font-size:21px; letter-spacing:-.028em;
+      display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    }
+    .col:not([data-span="1"]) .card.game .gtags{margin-top:9px}
+    .col:not([data-span="1"]) .card.game .gact{
+      position:absolute; right:22px; bottom:18px; padding:0;
+    }
+  }
 
   /* A one-track panel is ~284px, so its banner is only ~95px tall and the
      default 120px icon would stand taller than the art it straddles. Scale the
@@ -1279,9 +1311,9 @@
       <article class="card glass game">
         <button class="gopen" type="button" aria-haspopup="dialog" data-detail="g0">
 <span class="gbanner">
-            <img class="gslide" src="jade-fortune-banner.webp" width="2170" height="725" loading="lazy" decoding="async"
+            <img class="gslide" src="jade-fortune-banner.webp" width="2170" height="542" loading="lazy" decoding="async"
                  alt="Jade Fortune key art: a jade dragon flying through clouds above temple peaks." />
-            <img class="gslide is-2" src="jade-fortune-banner02.webp" width="2170" height="725" loading="lazy" decoding="async"
+            <img class="gslide is-2" src="jade-fortune-banner02.webp" width="2170" height="542" loading="lazy" decoding="async"
                  alt="Jade Fortune title treatment with the jade dragon and glowing orb." />
             <span class="gchips">
               <span class="tag live">Live</span>
@@ -1377,9 +1409,9 @@
       <article class="card glass game">
         <button class="gopen" type="button" aria-haspopup="dialog" data-detail="g1">
 <span class="gbanner">
-            <img class="gslide" src="muay-thai-banner.webp" width="2170" height="725" loading="lazy" decoding="async"
+            <img class="gslide" src="muay-thai-banner.webp" width="2170" height="542" loading="lazy" decoding="async"
                  alt="Muay Thai Champion key art: a fighter mid-punch in a floodlit arena hung with Thai flags." />
-            <img class="gslide is-2" src="muay-thai-banner02.webp" width="2170" height="725" loading="lazy" decoding="async"
+            <img class="gslide is-2" src="muay-thai-banner02.webp" width="2170" height="542" loading="lazy" decoding="async"
                  alt="Muay Thai Champion title treatment with the championship golden belt." />
             <span class="gchips">
               <span class="tag live">Live</span>
