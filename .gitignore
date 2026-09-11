@@ -17,3 +17,6 @@ Icon?
 # Google Drive partial-sync artefacts (this folder lives in Drive)
 *.tmp.driveupload
 *.tmp.drivedownload
+
+# Working notes and session exports — internal records, not showcase content
+temp/
