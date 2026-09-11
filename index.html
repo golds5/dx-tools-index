@@ -669,19 +669,18 @@
     /* Track sizes live in custom properties so the drag handles can rewrite
        them without an inline grid-template — which would beat the media
        queries below and strand the layout at three columns on a phone. */
-    --c1:1.2fr; --c2:1fr; --c3:1fr; --c4:1fr;
     width:var(--gw); margin-inline:calc((var(--gw) - 100%) / -2);
     display:grid; gap:0; align-items:start; margin-top:26px;
-    /* Four tracks, so a bots or skills panel can drop in later without a
-       relayout. minmax(0,…) or long titles and banners override the ratio. */
+    /* Four equal tracks. A panel occupies a whole number of them, so dragging
+       a boundary hands over a complete track and widths always land on a
+       multiple of one panel — never an arbitrary pixel value. */
     grid-template-columns:
-      minmax(0,var(--c1)) 16px minmax(0,var(--c2)) 16px
-      minmax(0,var(--c3)) 16px minmax(0,var(--c4));
+      minmax(0,1fr) 16px minmax(0,1fr) 16px minmax(0,1fr) 16px minmax(0,1fr);
   }
-  /* Track map: 1=c1 2=gut 3=c2 4=gut 5=c3 6=gut 7=c4.
-     A panel with data-span="2" takes the last two tracks and the gutter
-     between them. Set it back to "1" when a fourth panel arrives. */
-  .grid3 [data-span="2"]{grid-column:5 / -1}
+  /* Track map: 1=c1 2=gut 3=c2 4=gut 5=c3 6=gut 7=c4. Placement is written by
+     script from each panel's data-span, so a panel that absorbs a track keeps
+     the gutter it swallowed and the handles move with it. data-span in the
+     markup is the starting split. */
 
   /* Cards stack at the panel's full width, so each game is itself two panels
      wide rather than two one-panel cards sitting side by side. */
@@ -711,6 +710,11 @@
      — 32px backdrop blur plus a five-layer specular rim — is what made our
      panels read soft where the reference reads crisp. .col wins because it is
      declared after .glass at the same specificity. */
+  /* Placement arrives as --gc from the resize script. It has to be read through
+     a variable rather than written inline: an inline grid-column outranks every
+     media query, which left the two-column and stacked layouts unreachable and
+     overflowed the page by 317px on a phone. */
+  .grid3 .col, .grid3 .gutter{grid-column:var(--gc, auto)}
   .col{
     border-radius:var(--r-out); padding:18px 16px 8px;
     background:rgba(var(--glass),.80);
@@ -811,8 +815,8 @@
      cannot share the title's row without absolute positioning. */
   .col .card.game .gact{display:flex; justify-content:flex-end}
   .col[data-span="1"] .card.game .gact{padding:0 11px 14px}
-  .col[data-span="2"] .card.game{margin-bottom:18px}
-  .col[data-span="2"] .card.game .gact{padding:0 22px 20px}
+  .col:not([data-span="1"]) .card.game{margin-bottom:18px}
+  .col:not([data-span="1"]) .card.game .gact{padding:0 22px 20px}
 
   /* A one-track panel is ~284px, so its banner is only ~95px tall and the
      default 120px icon would stand taller than the art it straddles. Scale the
@@ -866,7 +870,11 @@
        handles go and the stylesheet takes the tracks back. */
     .gutter{display:none}
     .grid3{grid-template-columns:1fr 1fr; gap:14px}
-    /* Games drop to a full-width row of their own so the banners keep size.
+    /* Every panel drops its --gc placement first. A two-column grid has no
+       line 4, so a leftover "3 / 4" spills into an implicit column and blows
+       the neighbouring panel out to double width. */
+    .grid3 .col{grid-column:auto}
+    /* Games then takes a full-width row of its own so the banners keep size.
        No `order` needed — it is already last in the DOM. */
     .grid3 .b1{grid-column:1 / -1}
     .col .card.game{display:inline-block; width:calc(50% - 8px); vertical-align:top; margin-right:14px}
@@ -1515,16 +1523,14 @@
     setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark');
   });
 
-  /* ---- drag the boundary between panels to retrade their width ----
-     The grid has four tracks but only three panels today, because the games
-     panel spans two. So the handles work on PANELS, not tracks: a drag moves
-     width from one panel to its neighbour, and each panel spreads that delta
-     across however many tracks it owns. data-span drives the mapping, so
-     dropping in a bots or skills panel needs no change here.
+  /* ---- drag a boundary to hand a whole track to the neighbouring panel ----
+     The grid is four equal tracks and every panel owns a whole number of them,
+     so a drag snaps: a panel is one track wide, or two, never 1.37 of one.
+     Dragging past the halfway point of a track moves that track across.
 
-     Widths are written back as unitless fr taken from measured pixels. fr
-     distributes proportionally, so a saved ratio survives any window size
-     instead of pinning the layout to the screen it was dragged on. */
+     Placement is written here rather than in CSS because a panel that absorbs
+     a track also swallows the gutter that used to sit inside it, and the
+     handles have to follow the new boundaries. */
   (function(){
     var grid=document.getElementById('panelGrid');
     if(!grid) return;
@@ -1532,125 +1538,110 @@
     var guts=[].slice.call(grid.querySelectorAll('.gutter'));
     if(!cols.length || !guts.length) return;
 
-    var KEY='dxtools_cols', MIN=200, STEP=24, GUT=16;
-    var DEFAULT=[1.2,1,1,1];
-    var NT=DEFAULT.length;
-    var VARS=[]; for(var i=1;i<=NT;i++) VARS.push('--c'+i);
-
-    var spans=cols.map(function(c){ return parseInt(c.getAttribute('data-span')||'1',10) });
-    var starts=[], acc=0;
-    spans.forEach(function(sp){ starts.push(acc); acc+=sp; });
+    var KEY='dxtools_spans', GUT=16, SLOTS=4;
+    var INITIAL=cols.map(function(c){ return parseInt(c.getAttribute('data-span')||'1',10) });
+    var spans=INITIAL.slice();
 
     function wide(){ return !window.matchMedia || matchMedia('(min-width:1081px)').matches }
-
-    // Read the resolved track widths straight off the grid. The template
-    // alternates content track, gutter, content track… so take every other.
-    function tracks(){
-      var all=getComputedStyle(grid).gridTemplateColumns.split(/\s+/).map(parseFloat);
-      var out=[]; for(var i=0;i<all.length;i+=2) out.push(all[i]);
-      return out.slice(0,NT);
+    function trackPx(){
+      return parseFloat(getComputedStyle(grid).gridTemplateColumns.split(/\s+/)[0]) || 0;
     }
-    function panels(t){
-      return cols.map(function(_,i){
-        var w=0; for(var k=0;k<spans[i];k++) w+=t[starts[i]+k];
-        return w + GUT*(spans[i]-1);
+
+    // Template lines: content track n starts at line 2n-1. A panel starting at
+    // slot s spanning n slots covers lines 2s+1 .. 2s+2n, which is its own
+    // tracks plus the n-1 gutters between them.
+    function layout(){
+      var slot=0, starts=[];
+      spans.forEach(function(n){ starts.push(slot); slot+=n });
+      cols.forEach(function(c,i){
+        c.style.setProperty('--gc',(2*starts[i]+1)+' / '+(2*starts[i]+2*spans[i]));
+        c.setAttribute('data-span', String(spans[i]));
       });
-    }
-    function applyTracks(t){
-      t.forEach(function(x,i){ grid.style.setProperty(VARS[i], x+'fr') });
-    }
-
-    // Hand dx to panel a and take it from panel b, split across each panel's
-    // own tracks in proportion so a two-track panel keeps its internal balance.
-    function retrade(t,a,b,dx){
-      var out=t.slice();
-      function spread(pi,delta){
-        var tot=0, k;
-        for(k=0;k<spans[pi];k++) tot+=t[starts[pi]+k];
-        for(k=0;k<spans[pi];k++){
-          var share = tot>0 ? t[starts[pi]+k]/tot : 1/spans[pi];
-          out[starts[pi]+k] = t[starts[pi]+k] + delta*share;
-        }
-      }
-      spread(a,dx); spread(b,-dx);
-      return out;
-    }
-    // Clamp before applying, so a fast drag cannot briefly crush a panel
-    function clampDx(p,a,b,dx){
-      return Math.min(Math.max(dx, -(p[a]-MIN)), p[b]-MIN);
-    }
-
-    function report(){
-      var p=panels(tracks());
-      var total=p.reduce(function(x,y){ return x+y },0);
-      var run=0;
       guts.forEach(function(g,i){
-        run+=p[i];
-        g.setAttribute('aria-valuenow', String(Math.round(run/total*100)));
+        var edge=starts[i]+spans[i];            // first slot of the next panel
+        g.style.setProperty('--gc',(2*edge)+' / span 1');
+        g.setAttribute('aria-valuenow', String(Math.round(edge/SLOTS*100)));
       });
     }
+
     function save(){
-      try{ localStorage.setItem(KEY, JSON.stringify(tracks().map(function(n){ return Math.round(n) }))) }catch(e){}
-      report();
+      try{ localStorage.setItem(KEY, JSON.stringify(spans)) }catch(e){}
     }
     function reset(){
-      applyTracks(DEFAULT);
+      spans=INITIAL.slice(); layout();
       try{ localStorage.removeItem(KEY) }catch(e){}
-      report();
     }
 
     try{
       var saved=JSON.parse(localStorage.getItem(KEY));
-      // Length must match: a saved 3-track layout from before the fourth
-      // track existed would silently mangle the grid.
-      if(Array.isArray(saved) && saved.length===NT &&
-         saved.every(function(n){ return typeof n==='number' && isFinite(n) && n>0 })){
-        applyTracks(saved);
+      if(Array.isArray(saved) && saved.length===cols.length &&
+         saved.every(function(n){ return n===Math.round(n) && n>=1 }) &&
+         saved.reduce(function(a,b){ return a+b },0)===SLOTS){
+        spans=saved;
       }
     }catch(e){}
-    report();
+    layout();
+
+    // Move the boundary at `gi` by `shift` tracks. Whichever panel grows takes
+    // its tracks from the panels on the far side of the boundary, nearest
+    // first, each down to a floor of one track. Cascading past the immediate
+    // neighbour matters: with spans [1,1,2] the panel next to the first handle
+    // is already at the floor, so without this a drag there would do nothing
+    // even though the layout has a spare track two panels over.
+    function move(gi, base, shift){
+      var next=base.slice(), i, give;
+      if(shift>0){                              // boundary right: left panel grows
+        for(i=gi+1; i<next.length && shift>0; i++){
+          give=Math.min(next[i]-1, shift);
+          next[i]-=give; next[gi]+=give; shift-=give;
+        }
+      } else if(shift<0){                       // boundary left: right panel grows
+        var need=-shift;
+        for(i=gi; i>=0 && need>0; i--){
+          give=Math.min(next[i]-1, need);
+          next[i]-=give; next[gi+1]+=give; need-=give;
+        }
+      }
+      if(next.join()===spans.join()) return false;
+      spans=next; layout();
+      return true;
+    }
 
     guts.forEach(function(g,gi){
       g.addEventListener('pointerdown', function(e){
         if(!wide() || e.button) return;
         e.preventDefault();
-        var t0=tracks(), p0=panels(t0), x0=e.clientX;
+        var base=spans.slice(), x0=e.clientX, unit=trackPx()+GUT;
         g.classList.add('dragging');
         document.body.classList.add('resizing');
 
-        function move(ev){
-          applyTracks(retrade(t0, gi, gi+1, clampDx(p0, gi, gi+1, ev.clientX-x0)));
+        function onMove(ev){
+          if(unit<=0) return;
+          // round, not truncate: crossing half a track is what commits it
+          move(gi, base, Math.round((ev.clientX-x0)/unit));
         }
         function up(){
           g.classList.remove('dragging');
           document.body.classList.remove('resizing');
-          window.removeEventListener('pointermove', move);
+          window.removeEventListener('pointermove', onMove);
           window.removeEventListener('pointerup', up);
           window.removeEventListener('pointercancel', up);
           save();
         }
-        window.addEventListener('pointermove', move);
+        window.addEventListener('pointermove', onMove);
         window.addEventListener('pointerup', up);
         window.addEventListener('pointercancel', up);
       });
 
-      // It is a real separator, so arrows have to move it too
       g.addEventListener('keydown', function(e){
         if(!wide()) return;
         var dir = e.key==='ArrowLeft' ? -1 : e.key==='ArrowRight' ? 1 : 0;
-        if(dir){
-          var t=tracks();
-          applyTracks(retrade(t, gi, gi+1, clampDx(panels(t), gi, gi+1, dir*STEP)));
-          save(); e.preventDefault();
-        } else if(e.key==='Home' || e.key==='End'){
-          reset(); e.preventDefault();
-        }
+        if(dir){ move(gi, spans.slice(), dir); save(); e.preventDefault(); }
+        else if(e.key==='Home' || e.key==='End'){ reset(); e.preventDefault(); }
       });
 
       g.addEventListener('dblclick', reset);
     });
-
-    addEventListener('resize', report, {passive:true});
   })();
 
   /* ---- About: the context panel is a toggle in the top bar ----
