@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Digital Experience — What We Build</title>
-<meta name="description" content="Six live projects from the Digital Experience department: four internal tools and two original game prototypes." />
+<meta name="description" content="Ten projects from the Digital Experience department: eight internal tools and two original game prototypes." />
 <meta name="robots" content="noindex, nofollow, noarchive" />
 <link rel="icon" type="image/webp" href="favicon.webp" />
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
@@ -763,6 +763,8 @@
   .lg-lrl{background:linear-gradient(150deg,#37c08a,#149d6a)}
   .lg-cgs{background:linear-gradient(150deg,#f2708a,#d63f60)}
   .lg-onb{background:linear-gradient(150deg,#3fbdd6,#1593b4)}
+  .lg-adb{background:linear-gradient(150deg,#ef7a63,#cf3f28)}
+  .lg-awr{background:linear-gradient(150deg,#7d8ba6,#4a5670)}
   .tbd{flex:1; min-width:0}
   .tnm{display:block; padding-right:30px; font:600 14.5px/1.32 var(--display); letter-spacing:-.02em; color:var(--ink)}
   .tnm em{font-style:normal; font-weight:400; color:var(--faint)}
@@ -952,9 +954,9 @@
     <div class="ctx glass" id="aboutPanel" hidden>
       <dl>
         <dt>Why this page exists</dt>
-        <dd>DX started building its own software with AI in <b>July 2026</b>. Eight projects exist:
-          <b>4 tools</b> in day-to-day use, <b>2 tools</b> in pilot, and <b>2 game prototypes</b>.
-          This page shows all eight.</dd>
+        <dd>DX started building its own software with AI in <b>July 2026</b>. Ten projects exist:
+          <b>6 tools</b> in day-to-day use, <b>2 tools</b> in pilot, and <b>2 game prototypes</b>.
+          This page shows all ten.</dd>
 
         <dt>What we were trying to fix</dt>
         <dd>Four DX jobs were done by hand and kept repeating: weekly game sync, weekly QA icon checks,
@@ -973,7 +975,7 @@
 
       <section class="col glass sc1 b2" data-span="1" id="scope1" aria-labelledby="h-inuse">
         <div class="colhead">
-          <h2 id="h-inuse">Currently using</h2><span class="n">4</span>
+          <h2 id="h-inuse">Currently using</h2><span class="n">6</span>
           <p>Built in DX and running day to day. Each one replaced a job that was done by hand.</p>
         </div>
         <div class="tlist">
@@ -1162,6 +1164,117 @@
               each source shows its own date on screen, but they need refetching periodically to stay
               accurate.</span></div>
           </div></div>
+      </div>
+      <div class="trw">
+        <button class="trow" type="button" aria-haspopup="dialog" data-detail="d6">
+          <span class="ticon lg-adb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="11" cy="5.8" rx="6.5" ry="2.8"/><path d="M4.5 5.8v5.6c0 1.55 2.9 2.8 6.5 2.8 .7 0 1.4-.05 2-.14"/><path d="M4.5 11.4V17c0 1.55 2.9 2.8 6.5 2.8h.3"/><circle cx="17.2" cy="16.9" r="3"/><path d="M19.5 19.2l2 2"/></svg></span>
+          <span class="tbd">
+            <span class="tnm">ask-dx-db</span>
+            <span class="tds">Plain-English questions against the DX game catalogue, answered in <b>read-only SQL with the coverage attached</b>.</span>
+            <span class="tmt"><span class="tag live">Live</span><span class="tag gate">DX only</span><span class="tst">In active use · since Sep 2026</span></span>
+          </span>
+        </button>
+        <a class="tgo" href="https://app.notion.com/p/s5tech/DX-Game-Catalogue-Database-structure-sources-the-ask-dx-db-skill-3d848905ea778106946dc7a6cc29f89a" target="_blank" rel="noopener"
+           aria-label="Open the ask-dx-db reference doc in a new tab"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 9L9 3M9 3H4.6M9 3v4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <div class="cdet" id="d6"
+             data-title="ask-dx-db"
+             data-tags="<span class=&quot;tag live&quot;>Live</span><span class=&quot;tag gate&quot;>DX only</span>"
+             data-href="https://app.notion.com/p/s5tech/DX-Game-Catalogue-Database-structure-sources-the-ask-dx-db-skill-3d848905ea778106946dc7a6cc29f89a" data-label="Read the doc"
+             data-icon-key="ask-dx-db" hidden><div class="sec">
+            <h4>Why we built it</h4>
+            <ul>
+              <li>The catalogue holds <b>52,833 scraped rows</b> — 52,074 once duplicate crawls are set aside — across <b>1,336 game providers</b>, alongside the <b>47 competitor sites</b> DX tracks in four markets.</li>
+              <li>Every attribute column is text, and empty values were filled with junk rather than left blank. Only <b>56.9%</b> of the RTP column holds a readable percentage.</li>
+              <li>A straightforward average over that column either errors, or <b>silently averages 57% of the data and presents it as the whole</b>.</li>
+              <li>A number pulled from this catalogue has to arrive with its denominator attached, or it cannot be defended a week after it was quoted.</li>
+            </ul>
+          </div>
+          <div class="sec">
+            <h4>What it does</h4>
+            <ul>
+              <li>Ask in ordinary words. It works out the SQL, runs it <b>read-only</b>, and returns the number together with the coverage figure that qualifies it — <b>both measured in the same query</b>, so the caveat cannot drift from the figure.</li>
+              <li>Lists the tables, row counts and live dimension values <b>before</b> answering, so a new table, a widened scrape or a half-finished load is caught rather than averaged over.</li>
+              <li>Picks the table whose grain matches the question. <b>One row per game is not one row per site.</b></li>
+              <li>Applies the known traps: junk values, case differences between tables, and columns that hold a single value and can answer nothing.</li>
+              <li>Answers number first, then coverage, then the table it read and the date it read it.</li>
+            </ul>
+          </div>
+          <div class="sec">
+            <h4>What it will not do</h4>
+            <ul>
+              <li><b>It refuses rather than approximates.</b> The catalogue is a single snapshot, so trend and growth questions get a refusal, not an estimate.</li>
+              <li>Release-date questions are refused while the source column mixes date formats with spreadsheet serials.</li>
+              <li>A market that has not been scraped returns <b>a stated absence</b>, not a zero that reads like an empty market.</li>
+              <li>The games and the tracked competitors are <b>two different populations</b> — the games come from a public industry aggregator, not from the 47 sites — so "which games does competitor X offer" has no answer here, and it says so instead of joining them.</li>
+            </ul>
+          </div>
+          <div class="sec full verdict">
+            <h4>Result</h4>
+            <div class="proof">
+              <span class="lbl">Worked example</span>
+              Asked which tracked competitors are IP-restricted, it returned <b>7 of 47</b> — six recorded one
+              way in the source, one recorded another, matched on meaning rather than exact text — and showed
+              the buckets reconciling to the full 47, so <b>nothing had been quietly dropped</b>.
+            </div>
+            <h4 style="margin-top:20px">Open issues</h4>
+            <ul>
+              <li>A review against live data found <b>six defects in the documented query patterns</b>: two error out, three return a silently wrong number, one makes a broken setup look healthy. Patching them is open work.</li>
+              <li>The figures above are <b>a snapshot dated 11 Sep 2026</b> of a catalogue that reloads.</li>
+              <li><b>No unique constraint on the game link column</b>, so every reload re-admits the duplicates — currently 1.4% of rows, stamped with different page numbers by a source that re-paginated mid-crawl.</li>
+              <li><b>One market is crawled.</b> The other three tracked markets have no catalogue data, and no load history exists, so no trend question can ever be answered from this snapshot.</li>
+            </ul>
+          </div>
+        <div class="cfoot">
+          <span class="ghost">Read-only database access</span></div>
+        </div>
+      </div>
+      <div class="trw">
+        <button class="trow" type="button" aria-haspopup="dialog" data-detail="d7">
+          <span class="ticon lg-awr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6.2h17M6.4 12h11.2M10 17.8h4"/></svg></span>
+          <span class="tbd">
+            <span class="tnm">DX A&amp;W Request Log</span>
+            <span class="tds">The department-wide request log, <b>pre-filtered to Automation &amp; Workflow</b>, in three views.</span>
+            <span class="tmt"><span class="tag live">Live</span><span class="tag gate">Notion</span><span class="tst">In active use · since Sep 2026</span></span>
+          </span>
+        </button>
+        <a class="tgo" href="https://app.notion.com/p/s5tech/DX-A-W-Request-Log-3d848905ea7781e49868fb53d4da8af1" target="_blank" rel="noopener"
+           aria-label="Open the DX A&amp;W Request Log in a new tab"><svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 9L9 3M9 3H4.6M9 3v4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <div class="cdet" id="d7"
+             data-title="DX A&amp;W Request Log"
+             data-tags="<span class=&quot;tag live&quot;>Live</span><span class=&quot;tag gate&quot;>Notion</span>"
+             data-href="https://app.notion.com/p/s5tech/DX-A-W-Request-Log-3d848905ea7781e49868fb53d4da8af1" data-label="Open the log"
+             data-icon-key="DX A&amp;W Request Log" hidden><div class="sec">
+            <h4>Why we built it</h4>
+            <ul>
+              <li>Every request made to DX lands in one log. Rows are created from <b>Slack reactions</b> — a ticket reaction opens a row, a tick marks it shipped. <b>Nothing is typed by hand.</b></li>
+              <li>That log is department-wide, so anyone working in Automation &amp; Workflow had to <b>filter past Game Ops, Game Inventory and Market Advantages work every time</b>.</li>
+            </ul>
+          </div>
+          <div class="sec">
+            <h4>What it does</h4>
+            <ul>
+              <li>Three <b>linked views</b> of the same data source, each filtered to the A&amp;W pillar. <b>Nothing is duplicated</b> — no sync job, no copied rows, no second source of truth.</li>
+              <li><b>Open</b> — the daily working list. P0 at the top, and within a priority the oldest unanswered request sits above newer ones.</li>
+              <li><b>By status</b> — a board. Open against Released at a glance.</li>
+              <li><b>All requests</b> — the full history, including released date and the deliverable that closed each one out.</li>
+              <li>A row created by the Slack reaction appears in both places at once, and a row edited in either place <b>is the same row</b>.</li>
+            </ul>
+          </div>
+          <div class="sec full verdict">
+            <h4>Result</h4>
+            <p>In active use. It sits beside the DX Request Log in the shared docs database rather than
+              underneath it, so it is discoverable the same way the rest of the DX documentation is.
+              <b>The same pattern rebuilds any other slice of the log</b> — by pillar, by type, by owner —
+              because the filter is the only thing that differs.</p>
+            <div class="flag"><span><b>Open work.</b> The filter is exact, so A&amp;W work logged under the
+              plain <b>DX</b> tag does not appear here; correcting the tags at source is cleaner than widening
+              the filter, which would pull in genuine non-A&amp;W work. The <b>Type</b> options are inherited
+              placeholders, so any breakdown by Type is indicative until a real taxonomy replaces
+              them.</span></div>
+          </div>
+        <div class="cfoot">
+          <span class="ghost">Notion workspace access</span></div>
+        </div>
       </div>
         </div>
       </section>
@@ -1501,8 +1614,9 @@
   </div>
 
   <footer>
-    Digital Experience · S5Tech. Eight projects. Seven returned a live page on 8 September 2026; the eighth
-    is an internal pilot behind sign-in and was not inspected. Each project opens from its own row.
+    Digital Experience · S5Tech. Ten projects. Seven returned a live page on 8 September 2026; one is an
+    internal pilot behind sign-in and was not inspected; two are not web apps — a query skill and a filtered
+    Notion view — and each links to its own reference doc. Each project opens from its own row.
     Written to the S5Tech #BeClear, Context and Over-Communicate frameworks.
   </footer>
 </div>
